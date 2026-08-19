@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -577,6 +579,9 @@ class _MiniaturaAnexo extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final descricao = anexo.tipo == 'receita'
+        ? 'Foto da receita'
+        : 'Foto do medicamento';
     return FutureBuilder(
       future: ref.watch(anexoRepositoryProvider).arquivoDe(anexo),
       builder: (context, snapshot) => SizedBox(
@@ -588,7 +593,13 @@ class _MiniaturaAnexo extends ConsumerWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: snapshot.hasData
-                    ? Image.file(snapshot.data!, fit: BoxFit.cover)
+                    ? InkWell(
+                        onTap: () => _abrir(context, snapshot.data!, descricao),
+                        child: Hero(
+                          tag: 'anexo-${anexo.id}',
+                          child: Image.file(snapshot.data!, fit: BoxFit.cover),
+                        ),
+                      )
                     : ColoredBox(
                         color: Theme.of(context).colorScheme.surfaceContainer,
                         child: const Icon(Icons.image_outlined),
@@ -617,6 +628,18 @@ class _MiniaturaAnexo extends ConsumerWidget {
     );
   }
 
+  void _abrir(BuildContext context, File arquivo, String descricao) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _VisualizadorAnexo(
+          arquivo: arquivo,
+          titulo: descricao,
+          heroTag: 'anexo-${anexo.id}',
+        ),
+      ),
+    );
+  }
+
   Future<void> _remover(BuildContext context, WidgetRef ref) async {
     final accepted = await showDialog<bool>(
       context: context,
@@ -638,6 +661,52 @@ class _MiniaturaAnexo extends ConsumerWidget {
     if (accepted == true) {
       await ref.read(anexoRepositoryProvider).remover(anexo.id);
     }
+  }
+}
+
+/// Exibe o anexo em tela cheia, com zoom por gesto e arrasto.
+class _VisualizadorAnexo extends StatelessWidget {
+  const _VisualizadorAnexo({
+    required this.arquivo,
+    required this.titulo,
+    required this.heroTag,
+  });
+
+  final File arquivo;
+  final String titulo;
+  final String heroTag;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text(titulo),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
+      body: Center(
+        child: InteractiveViewer(
+          minScale: 1,
+          maxScale: 5,
+          child: Hero(
+            tag: heroTag,
+            child: Image.file(
+              arquivo,
+              fit: BoxFit.contain,
+              errorBuilder: (context, _, _) => const Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'Não foi possível abrir esta imagem.',
+                  style: TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

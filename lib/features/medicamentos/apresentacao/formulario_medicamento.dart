@@ -193,10 +193,14 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
           initialValue: _forma,
+          isExpanded: true,
           decoration: const InputDecoration(labelText: 'Forma farmacêutica'),
           items: [
             for (final item in _formas)
-              DropdownMenuItem(value: item, child: Text(item)),
+              DropdownMenuItem(
+                value: item,
+                child: Text(item, overflow: TextOverflow.ellipsis),
+              ),
           ],
           onChanged: (value) => setState(() => _forma = value!),
         ),
@@ -222,26 +226,33 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
+              flex: 3,
               child: TextFormField(
                 controller: _quantidadeDose,
-                decoration: const InputDecoration(labelText: 'Quantidade *'),
+                decoration: const InputDecoration(
+                  labelText: 'Quantidade *',
+                  errorMaxLines: 3,
+                ),
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                validator: (value) => (lerDecimal(value ?? '') ?? 0) <= 0
-                    ? 'Informe um valor maior que zero.'
-                    : null,
+                validator: (value) =>
+                    (lerDecimal(value ?? '') ?? 0) <= 0 ? 'Maior que 0.' : null,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              flex: 2,
+              flex: 4,
               child: DropdownButtonFormField<String>(
                 initialValue: _unidadeDose,
+                isExpanded: true,
                 decoration: const InputDecoration(labelText: 'Unidade *'),
                 items: [
                   for (final item in _unidades)
-                    DropdownMenuItem(value: item, child: Text(item)),
+                    DropdownMenuItem(
+                      value: item,
+                      child: Text(item, overflow: TextOverflow.ellipsis),
+                    ),
                 ],
                 onChanged: (value) => setState(() => _unidadeDose = value!),
               ),
