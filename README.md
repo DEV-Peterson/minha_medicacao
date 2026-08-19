@@ -89,6 +89,25 @@ notificação e fluxos essenciais de widgets.
   tratamentos encerrados continuam encerrados, então inicie um novo tratamento
   para voltar a gerar doses.
 
+## Ícone do aplicativo
+
+As artes de origem ficam em `assets/icone/` e não são empacotadas no APK:
+
+- `ic_launcher.png` — ícone quadrado herdado, com o fundo já aplicado;
+- `ic_launcher_frente.png` — camada frontal do ícone adaptativo (transparente);
+- `ic_launcher_mono.png` — silhueta para o tema monocromático do Android 13+.
+
+O fundo adaptativo é a cor `#16675E`, declarada em `pubspec.yaml`. Depois de
+trocar qualquer uma das artes, regere as densidades:
+
+```powershell
+dart run flutter_launcher_icons
+```
+
+O gerador aplica um recuo de 16% na camada frontal, e o launcher recorta o
+círculo visível de 72dp dentro dos 108dp. Na prática, o desenho precisa caber
+em um círculo de aproximadamente 62% do lado da imagem, centralizado.
+
 ## APK debug
 
 ```powershell
