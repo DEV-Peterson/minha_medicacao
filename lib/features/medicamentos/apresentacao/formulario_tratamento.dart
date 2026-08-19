@@ -127,12 +127,13 @@ class _FormularioTratamentoState extends ConsumerState<FormularioTratamento> {
                     controller: _quantidade,
                     decoration: const InputDecoration(
                       labelText: 'Quantidade *',
+                      errorMaxLines: 3,
                     ),
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
                     validator: (value) => (lerDecimal(value ?? '') ?? 0) <= 0
-                        ? 'Informe um valor positivo.'
+                        ? 'Maior que 0.'
                         : null,
                   ),
                 ),
@@ -140,7 +141,10 @@ class _FormularioTratamentoState extends ConsumerState<FormularioTratamento> {
                 Expanded(
                   child: TextFormField(
                     controller: _unidade,
-                    decoration: const InputDecoration(labelText: 'Unidade *'),
+                    decoration: const InputDecoration(
+                      labelText: 'Unidade *',
+                      errorMaxLines: 3,
+                    ),
                     validator: (value) => value == null || value.trim().isEmpty
                         ? 'Informe a unidade.'
                         : null,
