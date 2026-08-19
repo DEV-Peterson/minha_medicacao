@@ -1,0 +1,5 @@
+# Copie para android/key.properties e nunca versione o arquivo real.
+storePassword=SUBSTITUA_PELA_SENHA_DO_KEYSTORE
+keyPassword=SUBSTITUA_PELA_SENHA_DA_CHAVE
+keyAlias=minha_medicacao
+storeFile=C:\\caminho\\seguro\\minha-medicacao-release.jks
