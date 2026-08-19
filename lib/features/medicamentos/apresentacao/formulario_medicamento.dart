@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/layout.dart';
 import '../../../app/providers.dart';
 import '../../../core/util/formatadores.dart';
 import '../dominio/cadastro_medicamento.dart';
@@ -97,74 +98,76 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Novo medicamento')),
-      body: Form(
-        key: _formKey,
-        child: Stepper(
-          currentStep: _step,
-          onStepTapped: (value) => setState(() => _step = value),
-          controlsBuilder: (context, details) => Padding(
-            padding: const EdgeInsets.only(top: 16),
-            child: Wrap(
-              spacing: 8,
-              children: [
-                FilledButton(
-                  onPressed: _saving ? null : details.onStepContinue,
-                  child: Text(
-                    _step == 5
-                        ? _saving
-                              ? 'Salvando...'
-                              : 'Salvar'
-                        : 'Continuar',
+      body: ConteudoCentralizado(
+        child: Form(
+          key: _formKey,
+          child: Stepper(
+            currentStep: _step,
+            onStepTapped: (value) => setState(() => _step = value),
+            controlsBuilder: (context, details) => Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  FilledButton(
+                    onPressed: _saving ? null : details.onStepContinue,
+                    child: Text(
+                      _step == 5
+                          ? _saving
+                                ? 'Salvando...'
+                                : 'Salvar'
+                          : 'Continuar',
+                    ),
                   ),
-                ),
-                if (_step > 0)
-                  TextButton(
-                    onPressed: _saving ? null : details.onStepCancel,
-                    child: const Text('Voltar'),
-                  ),
-              ],
+                  if (_step > 0)
+                    TextButton(
+                      onPressed: _saving ? null : details.onStepCancel,
+                      child: const Text('Voltar'),
+                    ),
+                ],
+              ),
             ),
+            onStepContinue: () {
+              if (_step < 5) {
+                setState(() => _step++);
+              } else {
+                _salvar();
+              }
+            },
+            onStepCancel: () => setState(() => _step--),
+            steps: [
+              Step(
+                title: const Text('Medicamento'),
+                isActive: _step >= 0,
+                content: _etapaMedicamento(),
+              ),
+              Step(
+                title: const Text('Tratamento'),
+                isActive: _step >= 1,
+                content: _etapaTratamento(),
+              ),
+              Step(
+                title: const Text('Horários'),
+                isActive: _step >= 2,
+                content: _etapaHorarios(),
+              ),
+              Step(
+                title: const Text('Estoque'),
+                isActive: _step >= 3,
+                content: _etapaEstoque(),
+              ),
+              Step(
+                title: const Text('Observações'),
+                isActive: _step >= 4,
+                content: _etapaObservacoes(),
+              ),
+              Step(
+                title: const Text('Revisão'),
+                isActive: _step >= 5,
+                content: _etapaRevisao(),
+              ),
+            ],
           ),
-          onStepContinue: () {
-            if (_step < 5) {
-              setState(() => _step++);
-            } else {
-              _salvar();
-            }
-          },
-          onStepCancel: () => setState(() => _step--),
-          steps: [
-            Step(
-              title: const Text('Medicamento'),
-              isActive: _step >= 0,
-              content: _etapaMedicamento(),
-            ),
-            Step(
-              title: const Text('Tratamento'),
-              isActive: _step >= 1,
-              content: _etapaTratamento(),
-            ),
-            Step(
-              title: const Text('Horários'),
-              isActive: _step >= 2,
-              content: _etapaHorarios(),
-            ),
-            Step(
-              title: const Text('Estoque'),
-              isActive: _step >= 3,
-              content: _etapaEstoque(),
-            ),
-            Step(
-              title: const Text('Observações'),
-              isActive: _step >= 4,
-              content: _etapaObservacoes(),
-            ),
-            Step(
-              title: const Text('Revisão'),
-              isActive: _step >= 5,
-              content: _etapaRevisao(),
-            ),
-          ],
         ),
       ),
     );
@@ -173,6 +176,7 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
   Widget _etapaMedicamento() {
     return Column(
       children: [
+        const SizedBox(height: 12),
         TextFormField(
           key: const Key('campo_nome_medicamento'),
           controller: _nome,
@@ -222,42 +226,53 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
   Widget _etapaTratamento() {
     return Column(
       children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: TextFormField(
-                controller: _quantidadeDose,
-                decoration: const InputDecoration(
-                  labelText: 'Quantidade *',
-                  errorMaxLines: 3,
-                ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                validator: (value) =>
-                    (lerDecimal(value ?? '') ?? 0) <= 0 ? 'Maior que 0.' : null,
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final campoQuantidade = TextFormField(
+              controller: _quantidadeDose,
+              decoration: const InputDecoration(
+                labelText: 'Quantidade *',
+                errorMaxLines: 3,
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 4,
-              child: DropdownButtonFormField<String>(
-                initialValue: _unidadeDose,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Unidade *'),
-                items: [
-                  for (final item in _unidades)
-                    DropdownMenuItem(
-                      value: item,
-                      child: Text(item, overflow: TextOverflow.ellipsis),
-                    ),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              validator: (value) =>
+                  (lerDecimal(value ?? '') ?? 0) <= 0 ? 'Maior que 0.' : null,
+            );
+            final campoUnidade = DropdownButtonFormField<String>(
+              initialValue: _unidadeDose,
+              isExpanded: true,
+              decoration: const InputDecoration(labelText: 'Unidade *'),
+              items: [
+                for (final item in _unidades)
+                  DropdownMenuItem(
+                    value: item,
+                    child: Text(item, overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: (value) => setState(() => _unidadeDose = value!),
+            );
+            // Lado a lado só quando há espaço real para os dois rótulos.
+            if (constraints.maxWidth < 320) {
+              return Column(
+                children: [
+                  campoQuantidade,
+                  const SizedBox(height: 12),
+                  campoUnidade,
                 ],
-                onChanged: (value) => setState(() => _unidadeDose = value!),
-              ),
-            ),
-          ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(flex: 3, child: campoQuantidade),
+                const SizedBox(width: 12),
+                Expanded(flex: 4, child: campoUnidade),
+              ],
+            );
+          },
         ),
         if (_unidadeDose == 'outro') ...[
           const SizedBox(height: 12),
@@ -325,6 +340,7 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const SizedBox(height: 12),
         SegmentedButton<TipoAgendamentoCadastro>(
           segments: const [
             ButtonSegment(
@@ -393,6 +409,7 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
   Widget _etapaEstoque() {
     return Column(
       children: [
+        const SizedBox(height: 12),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           title: const Text('Controlar estoque'),
@@ -448,6 +465,7 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
   Widget _etapaObservacoes() {
     return Column(
       children: [
+        const SizedBox(height: 12),
         TextFormField(
           controller: _instrucoes,
           decoration: const InputDecoration(

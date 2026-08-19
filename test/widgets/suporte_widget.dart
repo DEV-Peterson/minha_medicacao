@@ -44,10 +44,32 @@ Future<void> montarAplicativo(
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 1)),
     );
-    if (find.byType(NavigationBar).evaluate().isNotEmpty) break;
+    if (find.byType(NavigationBar).evaluate().isNotEmpty ||
+        find.byType(NavigationRail).evaluate().isNotEmpty) {
+      break;
+    }
   }
-  expect(find.byType(NavigationBar), findsOneWidget);
+  expect(
+    find.byType(NavigationBar).evaluate().isNotEmpty ||
+        find.byType(NavigationRail).evaluate().isNotEmpty,
+    isTrue,
+    reason: 'a navegação principal deveria estar montada',
+  );
   await bombearInterface(tester);
+}
+
+/// Simula um aparelho com o tamanho lógico informado.
+///
+/// O tamanho volta ao padrão no fim do teste, sem afetar os demais casos.
+void usarTela(WidgetTester tester, Size tamanho, {double escalaDeFonte = 1.0}) {
+  tester.view.devicePixelRatio = 1.0;
+  tester.view.physicalSize = tamanho;
+  tester.platformDispatcher.textScaleFactorTestValue = escalaDeFonte;
+  addTearDown(() {
+    tester.view.resetPhysicalSize();
+    tester.view.resetDevicePixelRatio();
+    tester.platformDispatcher.clearTextScaleFactorTestValue();
+  });
 }
 
 void testWidgetsComBanco(

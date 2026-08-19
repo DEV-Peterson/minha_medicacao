@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/layout.dart';
 import '../../../app/providers.dart';
 import '../../../core/notificacoes/identificador_notificacao.dart';
 import '../../../core/notificacoes/planejador_notificacoes.dart';
@@ -59,30 +60,32 @@ class _ConteudoHoje extends ConsumerWidget {
               ),
       );
     }
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      children: [
-        Text(
-          formatarDataExtensa(agenda.data),
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 12),
-        _ResumoDia(agenda: agenda),
-        if (agenda.proxima case final next?) ...[
-          const SizedBox(height: 20),
-          Text('Próxima dose', style: Theme.of(context).textTheme.titleLarge),
+    return ConteudoCentralizado(
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        children: [
+          Text(
+            formatarDataExtensa(agenda.data),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 12),
+          _ResumoDia(agenda: agenda),
+          if (agenda.proxima case final next?) ...[
+            const SizedBox(height: 20),
+            Text('Próxima dose', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 8),
+            _CartaoProximaDose(item: next),
+          ],
+          const SizedBox(height: 24),
+          Text('Doses de hoje', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
-          _CartaoProximaDose(item: next),
+          for (var index = 0; index < agenda.doses.length; index++) ...[
+            _ItemDose(item: agenda.doses[index]),
+            if (index != agenda.doses.length - 1) const SizedBox(height: 8),
+          ],
         ],
-        const SizedBox(height: 24),
-        Text('Doses de hoje', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 8),
-        for (var index = 0; index < agenda.doses.length; index++) ...[
-          _ItemDose(item: agenda.doses[index]),
-          if (index != agenda.doses.length - 1) const SizedBox(height: 8),
-        ],
-      ],
+      ),
     );
   }
 }
@@ -559,12 +562,7 @@ class _ListaRolavel extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => ListView(
-    physics: const AlwaysScrollableScrollPhysics(),
-    children: [
-      SizedBox(height: MediaQuery.sizeOf(context).height * 0.62, child: child),
-    ],
-  );
+  Widget build(BuildContext context) => AreaVaziaRolavel(child: child);
 }
 
 void _mostrarErro(BuildContext context, Object error) {
