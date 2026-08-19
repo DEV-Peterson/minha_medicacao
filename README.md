@@ -1,299 +1,83 @@
+<img src="assets/icone/ic_launcher.png" width="96" alt="Ícone do Minha Medicação">
+
 # Minha Medicação
 
-Aplicativo Android local para organizar medicamentos, tratamentos, lembretes,
-histórico de doses e estoque. Foi projetado para uso pessoal em um Motorola
-Moto G86 e instalação direta por APK.
-
-O aplicativo não tem conta, login, servidor, analytics ou integração clínica.
-O SQLite local é a fonte de verdade; notificações são sempre reconstruíveis a
-partir do banco. O aplicativo é organizacional e não fornece orientação médica.
-
-## Stack
-
-- Flutter 3.44 / Dart 3.12 e Material 3;
-- Drift sobre SQLite, com foreign keys, constraints, índices e migrations;
-- Riverpod para injeção, streams e estado assíncrono;
-- `flutter_local_notifications`, `timezone` e `flutter_timezone`;
-- `image_picker` e armazenamento privado para fotos e receitas;
-- `archive`, `crypto`, `file_picker` e `share_plus` para backup local.
-
-O `applicationId` estável é `br.com.minha_medicacao`. Não o altere depois de
-instalar o primeiro APK que conterá dados reais.
-
-## Preparar o ambiente
-
-1. Instale o Flutter estável seguindo a documentação oficial:
-   <https://docs.flutter.dev/get-started/install/windows/mobile>.
-2. Instale Android SDK 36, command-line tools e Java 17.
-3. Aceite as licenças:
-
-   ```powershell
-   flutter doctor --android-licenses
-   flutter doctor -v
-   ```
-
-4. Na raiz do projeto, baixe as dependências e gere o código Drift:
-
-   ```powershell
-   flutter pub get
-   dart run build_runner build --delete-conflicting-outputs
-   ```
-
-Os schemas versionados ficam em `drift_schemas/app_database/`. A versão 2
-introduz datas civis estáveis para início/fim de tratamentos e inclui migração
-sem perda da versão 1. Ao mudar o schema, incremente `schemaVersion`, escreva
-uma migration e execute:
-
-```powershell
-dart run drift_dev make-migrations
-dart run build_runner build
-```
-
-Nunca resolva uma atualização apagando ou recriando o banco da usuária.
-
-## Executar e testar
+Um aplicativo simples para não esquecer os remédios.
 
-Com um aparelho Android conectado e depuração USB habilitada:
-
-```powershell
-flutter devices
-flutter run
-```
+Ele mostra o que você precisa tomar, em que horário e quanto. Avisa na hora
+certa, mesmo com o celular bloqueado. E quando você confirma que tomou, fica
+registrado — acabou aquela dúvida de "será que eu já tomei hoje?".
 
-Validação local completa:
-
-```powershell
-dart format --output=none --set-exit-if-changed .
-flutter analyze
-flutter test
-```
+Foi feito para uso pessoal, sem cadastro e sem cobrança. Tudo o que você
+cadastrar fica guardado apenas no seu celular.
 
-Os testes cobrem motor de agenda, viradas de data, intervalo ancorado,
-idempotência de doses, transações de estoque, backup/restore, identificadores de
-notificação e fluxos essenciais de widgets.
+## O que ele faz
 
-## Rotina no aplicativo
-
-- **Hoje** concentra o dia: resumo, próxima dose e as ações **Tomei**, **Adiar**
-  e **Não tomei**. A confirmação é idempotente e dá baixa no estoque uma única
-  vez.
-- **Histórico** permite corrigir um registro marcado como tomado por engano; o
-  estorno de estoque é criado vinculado à saída original, sem apagar nada.
-- **Estoque** repõe, ajusta pela contagem real e também **ativa ou desativa o
-  controle** de um medicamento cadastrado sem ele. Ao ativar, a quantidade
-  informada entra no ledger (entrada inicial ou ajuste, quando já houve
-  movimentações) e o consumo por dose passa a ser exigido enquanto existir
-  tratamento ativo.
-- **Medicamentos** cadastra, edita, anexa fotos, altera ou encerra tratamentos e
-  inativa um medicamento. Um medicamento inativado pode ser **reativado**; os
-  tratamentos encerrados continuam encerrados, então inicie um novo tratamento
-  para voltar a gerar doses.
-
-## Compatibilidade e layout
-
-O aplicativo declara `minSdk = 24` (Android 7.0) explicitamente em
-`android/app/build.gradle.kts`, em vez de herdar o padrão do Flutter, para que
-uma atualização da ferramenta não eleve o mínimo sem querer. O `targetSdk`
-acompanha o padrão atual do Flutter.
+- Mostra a agenda do dia: o que tomar, a que horas e quanto.
+- Avisa no horário, com a tela bloqueada, e deixa confirmar direto pelo aviso.
+- Marca o que já foi tomado, para não repetir a dose por esquecimento.
+- Acompanha quantos comprimidos ainda restam e avisa quando estão acabando.
+- Guarda o histórico das doses tomadas e das não tomadas.
+- Serve para remédio de uso contínuo e para tratamento com data para acabar.
+- Aceita horários fixos (08:00 e 20:00) ou intervalos (a cada 8 horas).
+- Guarda foto do medicamento e da receita, se você quiser.
 
-As diferenças entre versões do Android ficam concentradas nos lembretes:
-
-- `POST_NOTIFICATIONS` só existe no Android 13+; abaixo disso o plugin informa
-  o estado real das notificações;
-- `SCHEDULE_EXACT_ALARM` vale até o Android 12L e `USE_EXACT_ALARM` a partir do
-  Android 13; abaixo do Android 12 o alarme exato é concedido pelo sistema e a
-  verificação de saúde responde “habilitado”;
-- canais de notificação existem a partir do Android 8; em versões anteriores a
-  verificação de canal é considerada satisfeita.
+## Baixar e instalar
 
-O layout se adapta às faixas de largura do Material 3, definidas em
-`lib/app/layout.dart`:
+1. Abra **[a página de downloads](../../releases/latest)** pelo celular e baixe
+   o arquivo que termina em `.apk`.
+2. Toque no arquivo baixado.
+3. O celular vai perguntar se você autoriza instalar aplicativos dessa origem.
+   Pode permitir: esse aviso aparece porque o aplicativo não veio da Play Store.
+4. Confirme a instalação e abra o aplicativo.
+5. Na primeira abertura ele pede permissão para enviar avisos. **Permita** — é
+   assim que os lembretes funcionam.
 
-| Largura | Uso típico | Navegação | Conteúdo |
-| --- | --- | --- | --- |
-| < 600dp | celular em retrato | barra inferior | uma coluna |
-| 600–839dp | celular em paisagem, tablet pequeno | barra inferior | uma coluna centralizada |
-| ≥ 840dp | tablet em paisagem | trilha lateral | até três colunas de cartões |
+Funciona em celulares com Android 7 ou mais novo. Não funciona em iPhone.
 
-O conteúdo tem largura máxima para não esticar linhas de texto em telas
-grandes, as listas de cartões usam `Wrap` (a altura varia com o texto, então
-nada é cortado) e os rótulos da barra de navegação limitam a escala de fonte
-para caber em uma linha. O restante da interface acompanha o tamanho de fonte
-do sistema.
+## Perguntas comuns
 
-Os testes em `test/widgets/responsividade_test.dart` montam o aplicativo em
-telas de 320×640 até 1280×900, em paisagem e com fonte ampliada em 160%. Um
-estouro de layout falha o teste automaticamente.
+**Meus dados vão para algum lugar?**
+Não. Não existe conta, login nem servidor. O que você cadastra fica no seu
+celular e ninguém mais tem acesso — nem quem fez o aplicativo.
 
-## Ícone do aplicativo
+**Preciso de internet?**
+Não. Ele funciona normalmente no modo avião.
 
-As artes de origem ficam em `assets/icone/` e não são empacotadas no APK:
+**Tem anúncio ou cobrança?**
+Não, nenhum dos dois.
 
-- `ic_launcher.png` — ícone quadrado herdado, com o fundo já aplicado;
-- `ic_launcher_frente.png` — camada frontal do ícone adaptativo (transparente);
-- `ic_launcher_mono.png` — silhueta para o tema monocromático do Android 13+.
+**Não recebi o lembrete no horário. E agora?**
+Quase sempre é a economia de bateria do Android segurando o aviso. Vá em
+*Configurações do celular → Aplicativos → Minha Medicação → Bateria* e escolha
+a opção **sem restrição**. Dentro do aplicativo, em *Configurações →
+Lembretes*, dá para conferir se está tudo liberado.
 
-O fundo adaptativo é a cor `#16675E`, declarada em `pubspec.yaml`. Depois de
-trocar qualquer uma das artes, regere as densidades:
+**Vou trocar de celular. Perco tudo?**
+Não, se você fizer uma cópia antes. Em *Configurações → Backup → Criar backup*,
+o aplicativo gera um arquivo que você pode salvar no Google Drive ou mandar
+para si mesmo. No celular novo, instale o aplicativo e use *Restaurar backup*.
 
-```powershell
-dart run flutter_launcher_icons
-```
+**Como atualizo para uma versão nova?**
+Baixe o arquivo novo e instale por cima, sem desinstalar o aplicativo atual.
+Seus dados são preservados. Desinstalar apaga tudo, então faça uma cópia antes
+se precisar desinstalar.
 
-O gerador aplica um recuo de 16% na camada frontal, e o launcher recorta o
-círculo visível de 72dp dentro dos 108dp. Na prática, o desenho precisa caber
-em um círculo de aproximadamente 62% do lado da imagem, centralizado.
+**Posso usar para mais de uma pessoa?**
+Ele foi pensado para uma pessoa por celular. Dá para cadastrar quantos
+medicamentos quiser, mas não existe separação por perfil.
 
-## APK debug
+## Importante
 
-```powershell
-flutter build apk --debug
-```
+Este aplicativo **organiza**, não orienta. Ele não indica medicamento, não
+sugere dose e não diz o que fazer quando uma dose é esquecida. Ele apenas
+lembra e registra o que você cadastrou, seguindo a receita do seu médico.
 
-Saída esperada:
+Em caso de dúvida sobre um remédio ou sobre uma dose perdida, fale com o
+profissional de saúde que acompanha o tratamento.
 
-```text
-build/app/outputs/flutter-apk/app-debug.apk
-```
+## Para quem programa
 
-## Assinatura de release
-
-O Android só instala uma atualização sobre a versão existente quando o
-`applicationId` e a chave de assinatura são os mesmos. Perder a chave significa
-não conseguir atualizar a instalação mantendo os dados.
-
-Gere a chave uma única vez, fora do repositório:
-
-```powershell
-keytool -genkeypair -v `
-  -keystore C:\CAMINHO-SEGURO\minha-medicacao-release.jks `
-  -keyalg RSA -keysize 2048 -validity 10000 `
-  -alias minha_medicacao
-```
-
-Copie `android/key.properties.example` para `android/key.properties` e preencha
-o caminho, alias e senhas reais. Estes itens são ignorados pelo Git:
-
-```text
-android/key.properties
-key.properties
-*.jks
-*.keystore
-```
-
-Guarde cópias externas seguras do `.jks`, do alias e das senhas. Não envie a
-chave para o repositório, e-mail ou conversa. Para cada atualização, preserve a
-chave e aumente o build após `+` no campo `version` do `pubspec.yaml`.
-
-Se esta cópia já contém localmente `android/minha-medicacao-release.jks` e
-`android/key.properties`, eles foram gerados para este aparelho e estão
-ignorados pelo Git. Faça agora uma cópia segura dos dois; sem eles não será
-possível assinar uma atualização compatível.
-
-## APK release
-
-Com `android/key.properties` configurado:
-
-```powershell
-flutter build apk --release
-```
-
-Saída esperada:
-
-```text
-build/app/outputs/flutter-apk/app-release.apk
-```
-
-Sem `android/key.properties`, o build release falha com uma mensagem explícita.
-O projeto nunca usa silenciosamente a chave de debug para um APK release.
-
-## Instalar no Moto G86
-
-1. Transfira `app-release.apk` para o aparelho.
-2. Autorize temporariamente “Instalar apps desconhecidos” para o gerenciador de
-   arquivos usado.
-3. Abra o APK e conclua a instalação.
-4. Nas atualizações, instale o novo APK sobre o existente, sem desinstalar.
-5. Confirme antes que `applicationId` e keystore continuam os mesmos.
-
-Desinstalar o aplicativo apaga os dados privados locais. Gere e compartilhe um
-backup antes de desinstalar ou trocar de aparelho.
-
-## Permissões e lembretes
-
-O aplicativo declara apenas permissões relacionadas aos lembretes:
-
-- notificações (`POST_NOTIFICATIONS` em Android 13+);
-- alarmes exatos para horários prescritos;
-- recebimento do boot para restaurar agendamentos.
-
-Câmera e galeria são acessadas somente por seletores do sistema quando a
-usuária escolhe adicionar um anexo; não há permissão ampla de armazenamento.
-
-Fotos, banco e backups locais ficam na área privada do aplicativo. O seletor de
-arquivos Android (SAF) é usado para restaurar ZIPs, então não há permissão ampla
-de armazenamento. O Android Auto Backup fica desabilitado para que dados de
-medicação não saiam do aparelho sem uma ação explícita.
-
-### Validar notificações
-
-1. Abra **Configurações → Lembretes** e confirme notificações e alarmes exatos.
-2. Cadastre um medicamento para alguns minutos à frente.
-3. Bloqueie a tela e aguarde o lembrete.
-4. Teste **Tomei**, **Adiar** e **Não tomei**; confira histórico e estoque.
-5. Reinicie o aparelho e aguarde a próxima ocorrência.
-6. Repita com economia de bateria habilitada.
-7. Se houver atraso no Moto G86, remova a restrição de bateria para o aplicativo
-   nas configurações do Android e repita o teste.
-
-O sistema Android não garante alarmes depois de um “Forçar parada” manual até o
-aplicativo ser aberto novamente. Isso é diferente de apenas fechar a tela.
-
-## Backup
-
-Em **Configurações → Backup → Criar backup**, o aplicativo:
-
-1. cria um snapshot consistente do SQLite;
-2. inclui anexos referenciados;
-3. gera `manifest.json` com versão, tamanhos e SHA-256;
-4. valida o ZIP;
-5. abre o compartilhamento Android.
-
-Escolha o Google Drive no painel de compartilhamento se desejar. Não existe API,
-login ou credencial Google dentro do aplicativo. “Compartilhamento aberto” não
-significa que o upload do aplicativo de destino já terminou; confira o arquivo
-no Drive.
-
-## Restaurar backup
-
-1. Abra **Configurações → Backup → Restaurar backup**.
-2. Selecione o ZIP pelo seletor Android; o Drive pode aparecer como origem.
-3. Leia a confirmação: a restauração substituirá os dados atuais.
-4. Aguarde validação de tipo, versão, hashes, SQLite e anexos.
-5. Após o sucesso, confira medicamentos, agenda, estoque, histórico e fotos.
-
-Antes de substituir dados, o aplicativo cria um backup de segurança. ZIP
-incompatível, corrompido ou inseguro é rejeitado; uma falha restaura o estado
-anterior. Após restore, os lembretes são reconstruídos do banco.
-
-## Teste físico de aceite
-
-No Moto G86 real, valide pelo menos:
-
-- instalação e atualização do APK sem perda de dados;
-- funcionamento totalmente offline;
-- notificação com tela bloqueada, Doze, economia de bateria e reboot;
-- confirmação duplicada sem segunda baixa de estoque;
-- tratamento temporário após a data final e tratamento contínuo;
-- intervalo atravessando meia-noite;
-- reposição, ajuste e previsão de estoque;
-- foto pela câmera e galeria;
-- backup compartilhado para Drive e restauração completa.
-
-## Privacidade e limites
-
-Todos os dados permanecem localmente, salvo quando a usuária compartilha um
-backup. Não há telemetria externa. O aplicativo não interpreta receitas, não
-diagnostica e não recomenda compensar, dobrar ou alterar doses. Em caso de dúvida
-sobre uma dose perdida, siga a orientação prescrita ou procure um profissional
-de saúde.
+O código é Flutter com banco local em SQLite. A documentação técnica —
+arquitetura, como rodar, testes, geração do APK e assinatura — está em
+[DESENVOLVIMENTO.md](DESENVOLVIMENTO.md).
