@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/layout.dart';
 import '../../../app/providers.dart';
 import '../../../core/util/formatadores.dart';
 
@@ -35,29 +36,32 @@ class TelaEstoque extends ConsumerWidget {
         final enough = controlled.where((item) => !low.contains(item)).toList();
         return RefreshIndicator(
           onRefresh: () async => ref.invalidate(estoquesComPrevisaoProvider),
-          child: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            children: [
-              if (low.isNotEmpty)
-                _GrupoEstoque(
-                  title: 'Precisa repor em breve',
-                  items: low,
-                  warning: true,
-                ),
-              if (enough.isNotEmpty) ...[
-                if (low.isNotEmpty) const SizedBox(height: 24),
-                _GrupoEstoque(title: 'Estoque suficiente', items: enough),
+          child: ConteudoCentralizado(
+            larguraMaxima: 1100,
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              children: [
+                if (low.isNotEmpty)
+                  _GrupoEstoque(
+                    title: 'Precisa repor em breve',
+                    items: low,
+                    warning: true,
+                  ),
+                if (enough.isNotEmpty) ...[
+                  if (low.isNotEmpty) const SizedBox(height: 24),
+                  _GrupoEstoque(title: 'Estoque suficiente', items: enough),
+                ],
+                if (withoutControl.isNotEmpty) ...[
+                  if (low.isNotEmpty || enough.isNotEmpty)
+                    const SizedBox(height: 24),
+                  _GrupoEstoque(
+                    title: 'Sem controle de estoque',
+                    items: withoutControl,
+                  ),
+                ],
               ],
-              if (withoutControl.isNotEmpty) ...[
-                if (low.isNotEmpty || enough.isNotEmpty)
-                  const SizedBox(height: 24),
-                _GrupoEstoque(
-                  title: 'Sem controle de estoque',
-                  items: withoutControl,
-                ),
-              ],
-            ],
+            ),
           ),
         );
       },
@@ -90,14 +94,15 @@ class _GrupoEstoque extends StatelessWidget {
               ),
               const SizedBox(width: 8),
             ],
-            Text(title, style: Theme.of(context).textTheme.titleLarge),
+            Expanded(
+              child: Text(title, style: Theme.of(context).textTheme.titleLarge),
+            ),
           ],
         ),
         const SizedBox(height: 8),
-        for (var index = 0; index < items.length; index++) ...[
-          _CartaoEstoque(item: items[index]),
-          if (index != items.length - 1) const SizedBox(height: 8),
-        ],
+        GradeDeCartoes(
+          itens: [for (final item in items) _CartaoEstoque(item: item)],
+        ),
       ],
     );
   }

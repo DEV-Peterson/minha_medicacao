@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../app/layout.dart';
 import '../../../app/providers.dart';
 import '../../../core/arquivos/armazenamento_anexos.dart';
 import '../../../core/banco/app_database.dart';
@@ -26,12 +27,18 @@ class TelaMedicamentos extends ConsumerWidget {
         ),
         data: (data) => data.isEmpty
             ? const Center(child: Text('Nenhum medicamento cadastrado.'))
-            : ListView.separated(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
-                itemCount: data.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 8),
-                itemBuilder: (context, index) =>
-                    _CartaoMedicamento(item: data[index]),
+            : ConteudoCentralizado(
+                larguraMaxima: 1100,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+                  children: [
+                    GradeDeCartoes(
+                      itens: [
+                        for (final item in data) _CartaoMedicamento(item: item),
+                      ],
+                    ),
+                  ],
+                ),
               ),
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -137,111 +144,117 @@ class _DetalhesMedicamento extends ConsumerWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Icon(
-            Icons.medication,
-            size: 72,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            nomeMedicamento(med.nome, med.concentracao),
-            style: Theme.of(context).textTheme.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20),
-          Card(
-            child: Column(
-              children: [
-                ListTile(
-                  title: const Text('Forma farmacêutica'),
-                  subtitle: Text(med.formaFarmaceutica ?? 'Não informada'),
-                ),
-                if (treatment != null) ...[
+      body: ConteudoCentralizado(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Icon(
+              Icons.medication,
+              size: 72,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              nomeMedicamento(med.nome, med.concentracao),
+              style: Theme.of(context).textTheme.headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Card(
+              child: Column(
+                children: [
                   ListTile(
-                    title: const Text('Dose'),
-                    subtitle: Text(
-                      '${formatarQuantidade(treatment.quantidadeDose)} '
-                      '${treatment.unidadeDose}',
-                    ),
+                    title: const Text('Forma farmacêutica'),
+                    subtitle: Text(med.formaFarmaceutica ?? 'Não informada'),
                   ),
-                  ListTile(
-                    title: const Text('Agenda'),
-                    subtitle: Text(_descricaoAgenda(item)),
-                  ),
-                  ListTile(
-                    title: const Text('Período'),
-                    subtitle: Text(
-                      treatment.usoContinuo
-                          ? 'Uso contínuo desde ${formatarData(treatment.dataInicio)}'
-                          : '${formatarData(treatment.dataInicio)} a '
-                                '${formatarData(treatment.dataFim!)}',
-                    ),
-                  ),
-                  if (treatment.instrucoes != null)
+                  if (treatment != null) ...[
                     ListTile(
-                      title: const Text('Instruções'),
-                      subtitle: Text(treatment.instrucoes!),
+                      title: const Text('Dose'),
+                      subtitle: Text(
+                        '${formatarQuantidade(treatment.quantidadeDose)} '
+                        '${treatment.unidadeDose}',
+                      ),
+                    ),
+                    ListTile(
+                      title: const Text('Agenda'),
+                      subtitle: Text(_descricaoAgenda(item)),
+                    ),
+                    ListTile(
+                      title: const Text('Período'),
+                      subtitle: Text(
+                        treatment.usoContinuo
+                            ? 'Uso contínuo desde ${formatarData(treatment.dataInicio)}'
+                            : '${formatarData(treatment.dataInicio)} a '
+                                  '${formatarData(treatment.dataFim!)}',
+                      ),
+                    ),
+                    if (treatment.instrucoes != null)
+                      ListTile(
+                        title: const Text('Instruções'),
+                        subtitle: Text(treatment.instrucoes!),
+                      ),
+                  ],
+                  if (med.observacoes != null)
+                    ListTile(
+                      title: const Text('Observações'),
+                      subtitle: Text(med.observacoes!),
                     ),
                 ],
-                if (med.observacoes != null)
-                  ListTile(
-                    title: const Text('Observações'),
-                    subtitle: Text(med.observacoes!),
-                  ),
-              ],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          _SecaoAnexos(medicamentoId: med.id),
-          const SizedBox(height: 16),
-          if (med.ativo && treatment == null)
-            FilledButton.tonalIcon(
-              onPressed: () async {
-                final changed = await Navigator.of(context).push<bool>(
-                  MaterialPageRoute<bool>(
-                    builder: (_) => FormularioTratamento(item: item),
-                  ),
-                );
-                if (changed == true && context.mounted) Navigator.pop(context);
-              },
-              icon: const Icon(Icons.add_alarm_outlined),
-              label: const Text('Iniciar novo tratamento'),
-            ),
-          if (treatment != null && treatment.ativo)
-            FilledButton.tonalIcon(
-              onPressed: () async {
-                final changed = await Navigator.of(context).push<bool>(
-                  MaterialPageRoute<bool>(
-                    builder: (_) => FormularioTratamento(item: item),
-                  ),
-                );
-                if (changed == true && context.mounted) Navigator.pop(context);
-              },
-              icon: const Icon(Icons.edit_calendar_outlined),
-              label: const Text('Alterar tratamento'),
-            ),
-          if (treatment != null && treatment.ativo)
-            OutlinedButton.icon(
-              onPressed: () => _encerrar(context, ref, treatment.id),
-              icon: const Icon(Icons.event_busy),
-              label: const Text('Encerrar tratamento'),
-            ),
-          if (med.ativo)
-            TextButton.icon(
-              onPressed: () => _inativar(context, ref),
-              icon: const Icon(Icons.block),
-              label: const Text('Inativar medicamento'),
-            )
-          else
-            FilledButton.tonalIcon(
-              onPressed: () => _reativar(context, ref),
-              icon: const Icon(Icons.restart_alt),
-              label: const Text('Reativar medicamento'),
-            ),
-        ],
+            const SizedBox(height: 16),
+            _SecaoAnexos(medicamentoId: med.id),
+            const SizedBox(height: 16),
+            if (med.ativo && treatment == null)
+              FilledButton.tonalIcon(
+                onPressed: () async {
+                  final changed = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute<bool>(
+                      builder: (_) => FormularioTratamento(item: item),
+                    ),
+                  );
+                  if (changed == true && context.mounted) {
+                    Navigator.pop(context);
+                  }
+                },
+                icon: const Icon(Icons.add_alarm_outlined),
+                label: const Text('Iniciar novo tratamento'),
+              ),
+            if (treatment != null && treatment.ativo)
+              FilledButton.tonalIcon(
+                onPressed: () async {
+                  final changed = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute<bool>(
+                      builder: (_) => FormularioTratamento(item: item),
+                    ),
+                  );
+                  if (changed == true && context.mounted) {
+                    Navigator.pop(context);
+                  }
+                },
+                icon: const Icon(Icons.edit_calendar_outlined),
+                label: const Text('Alterar tratamento'),
+              ),
+            if (treatment != null && treatment.ativo)
+              OutlinedButton.icon(
+                onPressed: () => _encerrar(context, ref, treatment.id),
+                icon: const Icon(Icons.event_busy),
+                label: const Text('Encerrar tratamento'),
+              ),
+            if (med.ativo)
+              TextButton.icon(
+                onPressed: () => _inativar(context, ref),
+                icon: const Icon(Icons.block),
+                label: const Text('Inativar medicamento'),
+              )
+            else
+              FilledButton.tonalIcon(
+                onPressed: () => _reativar(context, ref),
+                icon: const Icon(Icons.restart_alt),
+                label: const Text('Reativar medicamento'),
+              ),
+          ],
+        ),
       ),
     );
   }

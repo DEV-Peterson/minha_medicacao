@@ -9,6 +9,7 @@ import '../features/estoque/apresentacao/tela_estoque.dart';
 import '../features/historico/apresentacao/tela_historico.dart';
 import '../features/hoje/apresentacao/tela_hoje.dart';
 import '../features/medicamentos/apresentacao/tela_medicamentos.dart';
+import 'layout.dart';
 import 'providers.dart';
 import 'tema.dart';
 
@@ -123,6 +124,11 @@ class _NavegacaoPrincipalState extends ConsumerState<_NavegacaoPrincipal>
         ),
       );
     }
+    // Em telas largas a navegação vira uma trilha lateral; em celulares
+    // permanece a barra inferior.
+    final usarTrilha = larguraDaJanela(context) == LarguraJanela.expandida;
+    final corpo = IndexedStack(index: _index, children: _pages);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_titles[_index]),
@@ -138,35 +144,22 @@ class _NavegacaoPrincipalState extends ConsumerState<_NavegacaoPrincipal>
           ),
         ],
       ),
-      body: IndexedStack(index: _index, children: _pages),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (value) => setState(() => _index = value),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.today_outlined),
-            selectedIcon: Icon(Icons.today),
-            label: 'Hoje',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.medication_outlined),
-            selectedIcon: Icon(Icons.medication),
-            label: 'Medicamentos',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.inventory_2_outlined),
-            selectedIcon: Icon(Icons.inventory_2),
-            label: 'Estoque',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history),
-            label: 'Histórico',
-          ),
-        ],
-      ),
+      body: usarTrilha
+          ? Row(
+              children: [
+                _TrilhaNavegacao(indice: _index, aoSelecionar: _selecionarAba),
+                const VerticalDivider(width: 1, thickness: 1),
+                Expanded(child: corpo),
+              ],
+            )
+          : corpo,
+      bottomNavigationBar: usarTrilha
+          ? null
+          : _BarraNavegacao(indice: _index, aoSelecionar: _selecionarAba),
     );
   }
+
+  void _selecionarAba(int indice) => setState(() => _index = indice);
 
   Future<void> _inicializarAplicacao() async {
     if (_falhaInicializacao != null) {
@@ -267,5 +260,74 @@ class _NavegacaoPrincipalState extends ConsumerState<_NavegacaoPrincipal>
     } on Object catch (error) {
       debugPrint('Falha ao inicializar lembretes: $error');
     }
+  }
+}
+
+/// Destinos compartilhados pela barra inferior e pela trilha lateral.
+class _Destino {
+  const _Destino(this.icone, this.iconeSelecionado, this.rotulo);
+
+  final IconData icone;
+  final IconData iconeSelecionado;
+  final String rotulo;
+}
+
+const _destinos = [
+  _Destino(Icons.today_outlined, Icons.today, 'Hoje'),
+  _Destino(Icons.medication_outlined, Icons.medication, 'Medicamentos'),
+  _Destino(Icons.inventory_2_outlined, Icons.inventory_2, 'Estoque'),
+  _Destino(Icons.history_outlined, Icons.history, 'Histórico'),
+];
+
+class _BarraNavegacao extends StatelessWidget {
+  const _BarraNavegacao({required this.indice, required this.aoSelecionar});
+
+  final int indice;
+  final ValueChanged<int> aoSelecionar;
+
+  @override
+  Widget build(BuildContext context) {
+    // A escala de fonte do sistema é respeitada no conteúdo, mas limitada nos
+    // rótulos da barra para que "Medicamentos" não quebre em duas linhas.
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.1,
+      child: NavigationBar(
+        selectedIndex: indice,
+        onDestinationSelected: aoSelecionar,
+        destinations: [
+          for (final destino in _destinos)
+            NavigationDestination(
+              icon: Icon(destino.icone),
+              selectedIcon: Icon(destino.iconeSelecionado),
+              label: destino.rotulo,
+              tooltip: destino.rotulo,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrilhaNavegacao extends StatelessWidget {
+  const _TrilhaNavegacao({required this.indice, required this.aoSelecionar});
+
+  final int indice;
+  final ValueChanged<int> aoSelecionar;
+
+  @override
+  Widget build(BuildContext context) {
+    return NavigationRail(
+      selectedIndex: indice,
+      onDestinationSelected: aoSelecionar,
+      labelType: NavigationRailLabelType.all,
+      destinations: [
+        for (final destino in _destinos)
+          NavigationRailDestination(
+            icon: Icon(destino.icone),
+            selectedIcon: Icon(destino.iconeSelecionado),
+            label: Text(destino.rotulo),
+          ),
+      ],
+    );
   }
 }

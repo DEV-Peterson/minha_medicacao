@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/layout.dart';
 import '../../../app/providers.dart';
 import '../../../core/data_hora/data_hora_local.dart';
 import '../../../core/util/formatadores.dart';
@@ -33,49 +34,57 @@ class _TelaHistoricoState extends ConsumerState<TelaHistorico> {
     final repository = ref.watch(historicoRepositoryProvider);
     final medications = ref.watch(medicamentosProvider).valueOrNull ?? const [];
     final endExclusive = DataHoraLocal.inicioDoProximoDia(_periodo.end);
+    final filtroPeriodo = OutlinedButton.icon(
+      onPressed: _selecionarPeriodo,
+      icon: const Icon(Icons.date_range),
+      label: Text(
+        '${formatarData(_periodo.start)} a ${formatarData(_periodo.end)}',
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+    final filtroMedicamento = DropdownButtonFormField<String?>(
+      initialValue: _medicamentoId,
+      isExpanded: true,
+      decoration: const InputDecoration(labelText: 'Medicamento'),
+      items: [
+        const DropdownMenuItem<String?>(value: null, child: Text('Todos')),
+        for (final item in medications)
+          DropdownMenuItem<String?>(
+            value: item.medicamento.id,
+            child: Text(
+              nomeMedicamento(
+                item.medicamento.nome,
+                item.medicamento.concentracao,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+      ],
+      onChanged: (value) => setState(() => _medicamentoId = value),
+    );
+
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _selecionarPeriodo,
-                      icon: const Icon(Icons.date_range),
-                      label: Text(
-                        '${formatarData(_periodo.start)} a '
-                        '${formatarData(_periodo.end)}',
-                      ),
+          child: ConteudoCentralizado(
+            child: LayoutBuilder(
+              builder: (context, constraints) => constraints.maxWidth < 520
+                  ? Column(
+                      children: [
+                        SizedBox(width: double.infinity, child: filtroPeriodo),
+                        const SizedBox(height: 8),
+                        filtroMedicamento,
+                      ],
+                    )
+                  : Row(
+                      children: [
+                        Expanded(child: filtroPeriodo),
+                        const SizedBox(width: 12),
+                        Expanded(flex: 2, child: filtroMedicamento),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String?>(
-                initialValue: _medicamentoId,
-                decoration: const InputDecoration(labelText: 'Medicamento'),
-                items: [
-                  const DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text('Todos'),
-                  ),
-                  for (final item in medications)
-                    DropdownMenuItem<String?>(
-                      value: item.medicamento.id,
-                      child: Text(
-                        nomeMedicamento(
-                          item.medicamento.nome,
-                          item.medicamento.concentracao,
-                        ),
-                      ),
-                    ),
-                ],
-                onChanged: (value) => setState(() => _medicamentoId = value),
-              ),
-            ],
+            ),
           ),
         ),
         Expanded(
@@ -100,7 +109,7 @@ class _TelaHistoricoState extends ConsumerState<TelaHistorico> {
                   child: Text('Nenhuma dose registrada neste período.'),
                 );
               }
-              return _ListaHistorico(items: items);
+              return ConteudoCentralizado(child: _ListaHistorico(items: items));
             },
           ),
         ),

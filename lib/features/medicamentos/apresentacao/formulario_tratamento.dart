@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/layout.dart';
 import '../../../app/providers.dart';
 import '../../../core/util/formatadores.dart';
 import '../dados/medicamento_repository.dart';
@@ -100,186 +101,189 @@ class _FormularioTratamentoState extends ConsumerState<FormularioTratamento> {
       appBar: AppBar(
         title: Text(_criando ? 'Novo tratamento' : 'Alterar tratamento'),
       ),
-      body: Form(
-        key: _form,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Card(
-              color: Theme.of(context).colorScheme.secondaryContainer,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  _criando
-                      ? 'O novo tratamento será associado a este medicamento. '
-                            'O histórico de tratamentos anteriores será preservado.'
-                      : 'A configuração atual será encerrada. A nova valerá apenas '
-                            'a partir da data escolhida, preservando o histórico anterior.',
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _quantidade,
-                    decoration: const InputDecoration(
-                      labelText: 'Quantidade *',
-                      errorMaxLines: 3,
-                    ),
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    validator: (value) => (lerDecimal(value ?? '') ?? 0) <= 0
-                        ? 'Maior que 0.'
-                        : null,
+      body: ConteudoCentralizado(
+        child: Form(
+          key: _form,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Card(
+                color: Theme.of(context).colorScheme.secondaryContainer,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    _criando
+                        ? 'O novo tratamento será associado a este medicamento. '
+                              'O histórico de tratamentos anteriores será preservado.'
+                        : 'A configuração atual será encerrada. A nova valerá apenas '
+                              'a partir da data escolhida, preservando o histórico anterior.',
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _unidade,
-                    decoration: const InputDecoration(
-                      labelText: 'Unidade *',
-                      errorMaxLines: 3,
-                    ),
-                    validator: (value) => value == null || value.trim().isEmpty
-                        ? 'Informe a unidade.'
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                _criando ? 'Data de início' : 'Nova configuração a partir de',
               ),
-              subtitle: Text(formatarData(_inicio)),
-              trailing: const Icon(Icons.calendar_month),
-              onTap: _selecionarInicio,
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Uso contínuo'),
-              value: _continuo,
-              onChanged: (value) => setState(() {
-                _continuo = value;
-                _fim = value
-                    ? null
-                    : _fim ?? _inicio.add(const Duration(days: 7));
-              }),
-            ),
-            if (!_continuo)
+              const SizedBox(height: 16),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _quantidade,
+                      decoration: const InputDecoration(
+                        labelText: 'Quantidade *',
+                        errorMaxLines: 3,
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      validator: (value) => (lerDecimal(value ?? '') ?? 0) <= 0
+                          ? 'Maior que 0.'
+                          : null,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _unidade,
+                      decoration: const InputDecoration(
+                        labelText: 'Unidade *',
+                        errorMaxLines: 3,
+                      ),
+                      validator: (value) =>
+                          value == null || value.trim().isEmpty
+                          ? 'Informe a unidade.'
+                          : null,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Data de término'),
-                subtitle: Text(
-                  _fim == null ? 'Selecione' : formatarData(_fim!),
+                title: Text(
+                  _criando ? 'Data de início' : 'Nova configuração a partir de',
                 ),
-                trailing: const Icon(Icons.event_available),
-                onTap: _selecionarFim,
+                subtitle: Text(formatarData(_inicio)),
+                trailing: const Icon(Icons.calendar_month),
+                onTap: _selecionarInicio,
               ),
-            const SizedBox(height: 12),
-            SegmentedButton<TipoAgendamentoCadastro>(
-              segments: const [
-                ButtonSegment(
-                  value: TipoAgendamentoCadastro.horariosFixos,
-                  label: Text('Horários'),
-                  icon: Icon(Icons.schedule),
-                ),
-                ButtonSegment(
-                  value: TipoAgendamentoCadastro.intervalo,
-                  label: Text('Intervalo'),
-                  icon: Icon(Icons.repeat),
-                ),
-              ],
-              selected: {_tipo},
-              onSelectionChanged: (value) =>
-                  setState(() => _tipo = value.single),
-            ),
-            const SizedBox(height: 12),
-            if (_tipo == TipoAgendamentoCadastro.horariosFixos) ...[
-              for (final time in [..._horarios]..sort(_compareTimes))
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Uso contínuo'),
+                value: _continuo,
+                onChanged: (value) => setState(() {
+                  _continuo = value;
+                  _fim = value
+                      ? null
+                      : _fim ?? _inicio.add(const Duration(days: 7));
+                }),
+              ),
+              if (!_continuo)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.access_time),
-                  title: Text(_timeText(time)),
-                  trailing: IconButton(
-                    onPressed: _horarios.length == 1
-                        ? null
-                        : () => setState(() => _horarios.remove(time)),
-                    icon: const Icon(Icons.remove_circle_outline),
+                  title: const Text('Data de término'),
+                  subtitle: Text(
+                    _fim == null ? 'Selecione' : formatarData(_fim!),
                   ),
+                  trailing: const Icon(Icons.event_available),
+                  onTap: _selecionarFim,
                 ),
-              OutlinedButton.icon(
-                onPressed: _adicionarHorario,
-                icon: const Icon(Icons.add),
-                label: const Text('Adicionar horário'),
+              const SizedBox(height: 12),
+              SegmentedButton<TipoAgendamentoCadastro>(
+                segments: const [
+                  ButtonSegment(
+                    value: TipoAgendamentoCadastro.horariosFixos,
+                    label: Text('Horários'),
+                    icon: Icon(Icons.schedule),
+                  ),
+                  ButtonSegment(
+                    value: TipoAgendamentoCadastro.intervalo,
+                    label: Text('Intervalo'),
+                    icon: Icon(Icons.repeat),
+                  ),
+                ],
+                selected: {_tipo},
+                onSelectionChanged: (value) =>
+                    setState(() => _tipo = value.single),
               ),
-            ] else ...[
-              TextFormField(
-                controller: _intervalo,
-                decoration: const InputDecoration(
-                  labelText: 'Intervalo *',
-                  suffixText: 'horas',
+              const SizedBox(height: 12),
+              if (_tipo == TipoAgendamentoCadastro.horariosFixos) ...[
+                for (final time in [..._horarios]..sort(_compareTimes))
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.access_time),
+                    title: Text(_timeText(time)),
+                    trailing: IconButton(
+                      onPressed: _horarios.length == 1
+                          ? null
+                          : () => setState(() => _horarios.remove(time)),
+                      icon: const Icon(Icons.remove_circle_outline),
+                    ),
+                  ),
+                OutlinedButton.icon(
+                  onPressed: _adicionarHorario,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Adicionar horário'),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+              ] else ...[
+                TextFormField(
+                  controller: _intervalo,
+                  decoration: const InputDecoration(
+                    labelText: 'Intervalo *',
+                    suffixText: 'horas',
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  validator: (value) =>
+                      _tipo == TipoAgendamentoCadastro.intervalo &&
+                          (lerDecimal(value ?? '') ?? 0) <= 0
+                      ? 'Informe um intervalo positivo.'
+                      : null,
                 ),
-                validator: (value) =>
-                    _tipo == TipoAgendamentoCadastro.intervalo &&
-                        (lerDecimal(value ?? '') ?? 0) <= 0
-                    ? 'Informe um intervalo positivo.'
-                    : null,
-              ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Primeira dose'),
-                subtitle: Text(
-                  '${formatarData(_ancora)} às ${formatarHora(_ancora)}',
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Primeira dose'),
+                  subtitle: Text(
+                    '${formatarData(_ancora)} às ${formatarHora(_ancora)}',
+                  ),
+                  trailing: const Icon(Icons.edit_calendar),
+                  onTap: _selecionarAncora,
                 ),
-                trailing: const Icon(Icons.edit_calendar),
-                onTap: _selecionarAncora,
-              ),
-            ],
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _instrucoes,
-              decoration: const InputDecoration(labelText: 'Instruções'),
-              maxLines: 2,
-            ),
-            if (stockControlled) ...[
+              ],
               const SizedBox(height: 12),
               TextFormField(
-                controller: _consumo,
-                decoration: const InputDecoration(
-                  labelText: 'Consumo de estoque por dose *',
+                controller: _instrucoes,
+                decoration: const InputDecoration(labelText: 'Instruções'),
+                maxLines: 2,
+              ),
+              if (stockControlled) ...[
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _consumo,
+                  decoration: const InputDecoration(
+                    labelText: 'Consumo de estoque por dose *',
+                  ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  validator: (value) => (lerDecimal(value ?? '') ?? 0) <= 0
+                      ? 'Informe um consumo positivo.'
+                      : null,
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+              ],
+              const SizedBox(height: 24),
+              FilledButton.icon(
+                onPressed: _saving ? null : _salvar,
+                icon: const Icon(Icons.save_outlined),
+                label: Text(
+                  _saving
+                      ? 'Salvando...'
+                      : _criando
+                      ? 'Salvar tratamento'
+                      : 'Salvar nova configuração',
                 ),
-                validator: (value) => (lerDecimal(value ?? '') ?? 0) <= 0
-                    ? 'Informe um consumo positivo.'
-                    : null,
               ),
             ],
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: _saving ? null : _salvar,
-              icon: const Icon(Icons.save_outlined),
-              label: Text(
-                _saving
-                    ? 'Salvando...'
-                    : _criando
-                    ? 'Salvar tratamento'
-                    : 'Salvar nova configuração',
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

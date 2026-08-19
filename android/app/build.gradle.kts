@@ -36,7 +36,11 @@ android {
 
     defaultConfig {
         applicationId = "br.com.minha_medicacao"
-        minSdk = flutter.minSdkVersion
+        // Fixo em Android 7.0 (API 24), o menor nivel suportado pelo Flutter
+        // atual e pelos plugins usados. Deixar o padrao do Flutter faria uma
+        // atualizacao da ferramenta elevar o minimo em silencio, derrubando
+        // aparelhos antigos que hoje rodam o aplicativo.
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

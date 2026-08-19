@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/layout.dart';
 import '../../../app/providers.dart';
 import '../../../core/arquivos/arquivo_seguro.dart';
 import '../../../core/backup/backup_excecao.dart';
@@ -26,92 +27,95 @@ class _TelaConfiguracoesState extends ConsumerState<TelaConfiguracoes> {
         int.tryParse(settings.valueOrNull?['diasAlertaEstoque'] ?? '7') ?? 7;
     return Scaffold(
       appBar: AppBar(title: const Text('Configurações')),
-      body: ListView(
-        children: [
-          if (_ocupado) const LinearProgressIndicator(),
-          const _SectionTitle('Lembretes'),
-          ListTile(
-            leading: const Icon(Icons.notifications_outlined),
-            title: const Text('Notificações'),
-            subtitle: Text(
-              notificationHealth.when(
-                data: (health) =>
-                    health.notificacoesHabilitadas && health.canalHabilitado
-                    ? 'Habilitadas'
-                    : 'Não habilitadas',
-                loading: () => 'Verificando...',
-                error: (_, _) => 'Não foi possível verificar',
-              ),
-            ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.alarm_outlined),
-            title: const Text('Alarmes exatos'),
-            subtitle: Text(
-              notificationHealth.when(
-                data: (health) => health.alarmesExatosHabilitados
-                    ? 'Habilitados'
-                    : 'Não habilitados',
-                loading: () => 'Verificando...',
-                error: (_, _) => 'Não foi possível verificar',
-              ),
-            ),
-          ),
-          if (notificationHealth.valueOrNull?.proximoLembrete case final next?)
+      body: ConteudoCentralizado(
+        child: ListView(
+          children: [
+            if (_ocupado) const LinearProgressIndicator(),
+            const _SectionTitle('Lembretes'),
             ListTile(
-              leading: const Icon(Icons.upcoming_outlined),
-              title: const Text('Próximo lembrete'),
+              leading: const Icon(Icons.notifications_outlined),
+              title: const Text('Notificações'),
               subtitle: Text(
-                '${formatarData(next.dataHoraLocal)} às '
-                '${formatarHora(next.dataHoraLocal)} - ${next.corpo.split('\n').first}',
-              ),
-            ),
-          if (notificationHealth.valueOrNull case final health?)
-            if (!health.totalmenteHabilitadas)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: FilledButton.tonalIcon(
-                  onPressed: _ocupado ? null : _configurarLembretes,
-                  icon: const Icon(Icons.settings_outlined),
-                  label: const Text('Configurar lembretes'),
+                notificationHealth.when(
+                  data: (health) =>
+                      health.notificacoesHabilitadas && health.canalHabilitado
+                      ? 'Habilitadas'
+                      : 'Não habilitadas',
+                  loading: () => 'Verificando...',
+                  error: (_, _) => 'Não foi possível verificar',
                 ),
               ),
-          const Divider(),
-          const _SectionTitle('Estoque'),
-          ListTile(
-            leading: const Icon(Icons.inventory_2_outlined),
-            title: const Text('Avisar antes de acabar'),
-            subtitle: Text('Aproximadamente $days dias'),
-            onTap: () => _alterarDias(context, ref, days),
-          ),
-          const Divider(),
-          const _SectionTitle('Backup'),
-          ListTile(
-            enabled: !_ocupado,
-            leading: const Icon(Icons.backup_outlined),
-            title: const Text('Criar e compartilhar backup'),
-            subtitle: const Text('Banco e anexos em um único arquivo ZIP'),
-            onTap: _criarBackup,
-          ),
-          ListTile(
-            enabled: !_ocupado,
-            leading: const Icon(Icons.restore_outlined),
-            title: const Text('Restaurar backup'),
-            subtitle: const Text(
-              'Selecione um backup local ou no Google Drive',
             ),
-            onTap: _restaurarBackup,
-          ),
-          const Divider(),
-          const _SectionTitle('Sobre'),
-          const ListTile(
-            leading: Icon(Icons.info_outline),
-            title: Text('Minha Medicação'),
-            subtitle: Text(
-              'Aplicativo local de organização. Não fornece orientação médica.',
+            ListTile(
+              leading: const Icon(Icons.alarm_outlined),
+              title: const Text('Alarmes exatos'),
+              subtitle: Text(
+                notificationHealth.when(
+                  data: (health) => health.alarmesExatosHabilitados
+                      ? 'Habilitados'
+                      : 'Não habilitados',
+                  loading: () => 'Verificando...',
+                  error: (_, _) => 'Não foi possível verificar',
+                ),
+              ),
             ),
-          ),
-        ],
+            if (notificationHealth.valueOrNull?.proximoLembrete
+                case final next?)
+              ListTile(
+                leading: const Icon(Icons.upcoming_outlined),
+                title: const Text('Próximo lembrete'),
+                subtitle: Text(
+                  '${formatarData(next.dataHoraLocal)} às '
+                  '${formatarHora(next.dataHoraLocal)} - ${next.corpo.split('\n').first}',
+                ),
+              ),
+            if (notificationHealth.valueOrNull case final health?)
+              if (!health.totalmenteHabilitadas)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: FilledButton.tonalIcon(
+                    onPressed: _ocupado ? null : _configurarLembretes,
+                    icon: const Icon(Icons.settings_outlined),
+                    label: const Text('Configurar lembretes'),
+                  ),
+                ),
+            const Divider(),
+            const _SectionTitle('Estoque'),
+            ListTile(
+              leading: const Icon(Icons.inventory_2_outlined),
+              title: const Text('Avisar antes de acabar'),
+              subtitle: Text('Aproximadamente $days dias'),
+              onTap: () => _alterarDias(context, ref, days),
+            ),
+            const Divider(),
+            const _SectionTitle('Backup'),
+            ListTile(
+              enabled: !_ocupado,
+              leading: const Icon(Icons.backup_outlined),
+              title: const Text('Criar e compartilhar backup'),
+              subtitle: const Text('Banco e anexos em um único arquivo ZIP'),
+              onTap: _criarBackup,
+            ),
+            ListTile(
+              enabled: !_ocupado,
+              leading: const Icon(Icons.restore_outlined),
+              title: const Text('Restaurar backup'),
+              subtitle: const Text(
+                'Selecione um backup local ou no Google Drive',
+              ),
+              onTap: _restaurarBackup,
+            ),
+            const Divider(),
+            const _SectionTitle('Sobre'),
+            const ListTile(
+              leading: Icon(Icons.info_outline),
+              title: Text('Minha Medicação'),
+              subtitle: Text(
+                'Aplicativo local de organização. Não fornece orientação médica.',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

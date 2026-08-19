@@ -89,6 +89,42 @@ notificação e fluxos essenciais de widgets.
   tratamentos encerrados continuam encerrados, então inicie um novo tratamento
   para voltar a gerar doses.
 
+## Compatibilidade e layout
+
+O aplicativo declara `minSdk = 24` (Android 7.0) explicitamente em
+`android/app/build.gradle.kts`, em vez de herdar o padrão do Flutter, para que
+uma atualização da ferramenta não eleve o mínimo sem querer. O `targetSdk`
+acompanha o padrão atual do Flutter.
+
+As diferenças entre versões do Android ficam concentradas nos lembretes:
+
+- `POST_NOTIFICATIONS` só existe no Android 13+; abaixo disso o plugin informa
+  o estado real das notificações;
+- `SCHEDULE_EXACT_ALARM` vale até o Android 12L e `USE_EXACT_ALARM` a partir do
+  Android 13; abaixo do Android 12 o alarme exato é concedido pelo sistema e a
+  verificação de saúde responde “habilitado”;
+- canais de notificação existem a partir do Android 8; em versões anteriores a
+  verificação de canal é considerada satisfeita.
+
+O layout se adapta às faixas de largura do Material 3, definidas em
+`lib/app/layout.dart`:
+
+| Largura | Uso típico | Navegação | Conteúdo |
+| --- | --- | --- | --- |
+| < 600dp | celular em retrato | barra inferior | uma coluna |
+| 600–839dp | celular em paisagem, tablet pequeno | barra inferior | uma coluna centralizada |
+| ≥ 840dp | tablet em paisagem | trilha lateral | até três colunas de cartões |
+
+O conteúdo tem largura máxima para não esticar linhas de texto em telas
+grandes, as listas de cartões usam `Wrap` (a altura varia com o texto, então
+nada é cortado) e os rótulos da barra de navegação limitam a escala de fonte
+para caber em uma linha. O restante da interface acompanha o tamanho de fonte
+do sistema.
+
+Os testes em `test/widgets/responsividade_test.dart` montam o aplicativo em
+telas de 320×640 até 1280×900, em paisagem e com fonte ampliada em 160%. Um
+estouro de layout falha o teste automaticamente.
+
 ## Ícone do aplicativo
 
 As artes de origem ficam em `assets/icone/` e não são empacotadas no APK:
