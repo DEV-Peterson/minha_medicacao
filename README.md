@@ -80,6 +80,13 @@ lembra e registra o que você cadastrou, seguindo a receita do seu médico.
 Em caso de dúvida sobre um remédio ou sobre uma dose perdida, fale com o
 profissional de saúde que acompanha o tratamento.
 
+## Privacidade e termos
+
+- [Política de Privacidade](docs/politica-de-privacidade.md) — o que o
+  aplicativo guarda, onde fica e quando algo sai do aparelho.
+- [Termos de Uso](docs/termos-de-uso.md) — o que o aplicativo é, o que não é e
+  os limites dos lembretes.
+
 ## Para quem programa
 
 O código é Flutter com banco local em SQLite. A documentação técnica —

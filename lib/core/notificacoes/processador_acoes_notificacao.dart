@@ -181,7 +181,8 @@ final class ProcessadorAcoesNotificacao {
 
     // A action nativa remove somente a notificacao visivel. Nao chamamos
     // cancel(id) no ID de origem, pois ele pode pertencer a uma recorrencia.
-    await _notificacoes.agendar(novoAgendamento);
+    final exato = await _notificacoes.alarmesExatosHabilitados();
+    await _notificacoes.agendar(novoAgendamento, exato: exato);
     return ResultadoProcessamentoAcaoNotificacao.adiamentoRegistrado;
   }
 

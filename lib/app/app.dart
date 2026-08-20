@@ -9,6 +9,7 @@ import '../features/estoque/apresentacao/tela_estoque.dart';
 import '../features/historico/apresentacao/tela_historico.dart';
 import '../features/hoje/apresentacao/tela_hoje.dart';
 import '../features/medicamentos/apresentacao/tela_medicamentos.dart';
+import '../core/util/registro_falhas.dart';
 import 'layout.dart';
 import 'providers.dart';
 import 'tema.dart';
@@ -22,6 +23,8 @@ class MinhaMedicacaoApp extends StatelessWidget {
       title: 'Minha Medicação',
       debugShowCheckedModeBanner: false,
       theme: criarTema(),
+      darkTheme: criarTema(brilho: Brightness.dark),
+      themeMode: ThemeMode.system,
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],
       localizationsDelegates: const [
@@ -180,7 +183,7 @@ class _NavegacaoPrincipalState extends ConsumerState<_NavegacaoPrincipal>
       });
       setState(() => _pronto = true);
     } on Object catch (error) {
-      debugPrint('Falha ao preparar os dados locais: $error');
+      registrarFalha('abertura do banco', error);
       if (mounted) setState(() => _falhaInicializacao = error);
     }
   }
@@ -191,7 +194,7 @@ class _NavegacaoPrincipalState extends ConsumerState<_NavegacaoPrincipal>
       await ref.read(servicoNotificacaoProvider).aoRetomar();
       ref.invalidate(saudeNotificacoesProvider);
     } on Object catch (error) {
-      debugPrint('Falha ao reconciliar dados ao retomar: $error');
+      registrarFalha('sincronização ao retomar', error);
     }
   }
 
@@ -209,7 +212,7 @@ class _NavegacaoPrincipalState extends ConsumerState<_NavegacaoPrincipal>
         ref.invalidate(saudeNotificacoesProvider);
       }
     } on Object catch (error) {
-      debugPrint('Falha ao encerrar tratamentos vencidos: $error');
+      registrarFalha('encerramento de tratamentos vencidos', error);
     }
   }
 
@@ -258,7 +261,7 @@ class _NavegacaoPrincipalState extends ConsumerState<_NavegacaoPrincipal>
         ref.invalidate(saudeNotificacoesProvider);
       });
     } on Object catch (error) {
-      debugPrint('Falha ao inicializar lembretes: $error');
+      registrarFalha('inicialização dos lembretes', error);
     }
   }
 }

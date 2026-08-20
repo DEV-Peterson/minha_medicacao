@@ -798,7 +798,11 @@ class _MiniaturaAnexo extends ConsumerWidget {
                         onTap: () => _abrir(context, snapshot.data!, descricao),
                         child: Hero(
                           tag: 'anexo-${anexo.id}',
-                          child: Image.file(snapshot.data!, fit: BoxFit.cover),
+                          child: Image.file(
+                            snapshot.data!,
+                            fit: BoxFit.cover,
+                            semanticLabel: descricao,
+                          ),
                         ),
                       )
                     : ColoredBox(
@@ -895,6 +899,7 @@ class _VisualizadorAnexo extends StatelessWidget {
             child: Image.file(
               arquivo,
               fit: BoxFit.contain,
+              semanticLabel: titulo,
               errorBuilder: (context, _, _) => const Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(

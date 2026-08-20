@@ -11,7 +11,15 @@ abstract interface class PortaNotificacoesLocais {
 
   Future<void> criarCanal();
 
-  Future<void> agendar(AgendamentoNotificacao agendamento);
+  /// Agenda um lembrete.
+  ///
+  /// Com [exato] falso o Android pode atrasar a entrega em alguns
+  /// minutos, mas o lembrete continua chegando — o que é preferível a
+  /// não avisar quando a permissão de alarme exato não está concedida.
+  Future<void> agendar(
+    AgendamentoNotificacao agendamento, {
+    required bool exato,
+  });
 
   Future<void> cancelar(int id);
 

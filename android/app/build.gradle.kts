@@ -68,6 +68,11 @@ android {
             if (releaseKeyConfigured) {
                 signingConfig = signingConfigs.getByName("release")
             }
+            // Minificacao permanece desligada de proposito: o pacote e
+            // dominado pelas bibliotecas nativas do Flutter e do SQLite, e
+            // medimos ganho de apenas 18 KB em 64 MB. Nao compensa o risco de
+            // o R8 remover algo alcancado por reflexao nos plugins de
+            // notificacao e de banco.
         }
     }
 }

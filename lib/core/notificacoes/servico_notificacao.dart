@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 
 import 'package:drift/drift.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -11,6 +10,7 @@ import '../../features/hoje/dados/agenda_repository.dart';
 import '../../features/hoje/dominio/dose_prevista.dart';
 import '../banco/app_database.dart';
 import '../data_hora/relogio.dart';
+import '../util/registro_falhas.dart';
 import 'callback_notificacao.dart';
 import 'flutter_notificacoes_locais.dart';
 import 'fuso_horario_notificacoes.dart';
@@ -50,6 +50,8 @@ final class ServicoNotificacao {
   final DateTime Function() _agora;
   final int diasNoHorizonte;
 
+  static const String chaveModoAlarme = 'precisaoAlarmeLembretes';
+
   bool _pluginInicializado = false;
   bool _fusoInicializado = false;
 
@@ -83,10 +85,10 @@ final class ServicoNotificacao {
     await _notificacoes.criarCanal();
 
     final saude = await verificarSaude();
-    ResultadoReconciliacaoNotificacoes? reconciliacao;
-    if (saude.alarmesExatosHabilitados) {
-      reconciliacao = await reconciliar();
-    }
+    // A agenda é reconstruída mesmo sem permissão de alarme exato: nesse
+    // caso os lembretes são agendados em modo inexato e podem atrasar
+    // alguns minutos, o que é muito melhor do que não avisar.
+    final reconciliacao = await reconciliar();
     return ResultadoInicializacaoNotificacoes(
       saude: saude,
       fusoHorarioMudou: resultadoFuso.mudou,
@@ -102,8 +104,21 @@ final class ServicoNotificacao {
     DateTime? agora,
   }) async {
     await _garantirFusoInicializado();
+    final exato = await _notificacoes.alarmesExatosHabilitados();
+    await _recriarSeAPrecisaoMudou(exato);
     final planejamento = await _planejarTodos(agora ?? _agora());
-    return _reconciliador.reconciliar(planejamento.agendamentos);
+    return _reconciliador.reconciliar(planejamento.agendamentos, exato: exato);
+  }
+
+  /// Um alarme já agendado guarda a precisão com que foi criado, e a
+  /// reconciliação compara conteúdo, não precisão. Quando a permissão muda,
+  /// os pendentes precisam ser descartados para nascerem no modo correto.
+  Future<void> _recriarSeAPrecisaoMudou(bool exato) async {
+    final atual = exato ? 'exato' : 'inexato';
+    final salvo = await _configuracoes.obter(chaveModoAlarme);
+    if (salvo == atual) return;
+    if (salvo != null) await _notificacoes.cancelarTodas();
+    await _configuracoes.definir(chaveModoAlarme, atual);
   }
 
   Future<SaudeNotificacoes> verificarSaude({DateTime? agora}) async {
@@ -161,13 +176,8 @@ final class ServicoNotificacao {
   Future<void> _processarRespostaSegura(NotificationResponse resposta) async {
     try {
       await _processador.processar(resposta);
-    } on Object catch (erro, stackTrace) {
-      developer.log(
-        'Falha ao processar uma resposta de notificacao.',
-        name: 'minha_medicacao.notificacoes',
-        error: erro,
-        stackTrace: stackTrace,
-      );
+    } on Object catch (erro, pilha) {
+      registrarFalha('resposta de notificação', erro, pilha);
     }
   }
 

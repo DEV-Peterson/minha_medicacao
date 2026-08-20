@@ -8,8 +8,9 @@ final class ReconciliadorNotificacoes {
   final PortaNotificacoesLocais _notificacoes;
 
   Future<ResultadoReconciliacaoNotificacoes> reconciliar(
-    List<AgendamentoNotificacao> esperados,
-  ) async {
+    List<AgendamentoNotificacao> esperados, {
+    bool exato = true,
+  }) async {
     if (esperados.length > limiteSeguroAgendamentosAndroid) {
       throw StateError(
         'A reconciliacao recebeu ${esperados.length} alarmes; o limite '
@@ -67,7 +68,7 @@ final class ReconciliadorNotificacoes {
     var agendadas = 0;
     for (final esperado in esperados) {
       if (mantidos.contains(esperado.id)) continue;
-      await _notificacoes.agendar(esperado);
+      await _notificacoes.agendar(esperado, exato: exato);
       agendadas++;
     }
 
