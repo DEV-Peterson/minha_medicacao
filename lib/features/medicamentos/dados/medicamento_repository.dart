@@ -587,6 +587,71 @@ class MedicamentoRepository {
     );
   }
 
+  Future<int> contarRegistrosDose(String medicamentoId) async {
+    final consulta = _db.selectOnly(_db.registrosDose)
+      ..addColumns([_db.registrosDose.id.count()])
+      ..where(_db.registrosDose.medicamentoId.equals(medicamentoId));
+    final linha = await consulta.getSingle();
+    return linha.read(_db.registrosDose.id.count()) ?? 0;
+  }
+
+  /// Apaga definitivamente um medicamento que ainda não tem histórico.
+  ///
+  /// Serve para corrigir cadastro errado. As chaves estrangeiras são
+  /// `RESTRICT`, então a ordem importa: adiamentos e movimentações saem antes
+  /// dos registros e dos tratamentos que as originaram.
+  ///
+  /// Devolve os caminhos dos anexos, que precisam ser removidos do disco fora
+  /// da transação.
+  Future<List<String>> excluir(String medicamentoId) async {
+    return _db.transaction(() async {
+      final medicamento = await (_db.select(
+        _db.medicamentos,
+      )..where((tabela) => tabela.id.equals(medicamentoId))).getSingleOrNull();
+      if (medicamento == null) {
+        throw StateError('Medicamento não encontrado.');
+      }
+
+      final registros = await contarRegistrosDose(medicamentoId);
+      if (registros > 0) {
+        throw ExclusaoBloqueadaPorHistorico(registros);
+      }
+
+      final anexos = await (_db.select(
+        _db.anexos,
+      )..where((tabela) => tabela.medicamentoId.equals(medicamentoId))).get();
+      final tratamentos = await (_db.select(
+        _db.tratamentos,
+      )..where((tabela) => tabela.medicamentoId.equals(medicamentoId))).get();
+      final tratamentoIds = [
+        for (final tratamento in tratamentos) tratamento.id,
+      ];
+
+      await (_db.delete(
+        _db.adiamentosDose,
+      )..where((tabela) => tabela.medicamentoId.equals(medicamentoId))).go();
+      await (_db.delete(
+        _db.movimentacoesEstoque,
+      )..where((tabela) => tabela.medicamentoId.equals(medicamentoId))).go();
+      if (tratamentoIds.isNotEmpty) {
+        await (_db.delete(
+          _db.horariosTratamento,
+        )..where((tabela) => tabela.tratamentoId.isIn(tratamentoIds))).go();
+      }
+      await (_db.delete(
+        _db.tratamentos,
+      )..where((tabela) => tabela.medicamentoId.equals(medicamentoId))).go();
+      await (_db.delete(
+        _db.anexos,
+      )..where((tabela) => tabela.medicamentoId.equals(medicamentoId))).go();
+      await (_db.delete(
+        _db.medicamentos,
+      )..where((tabela) => tabela.id.equals(medicamentoId))).go();
+
+      return [for (final anexo in anexos) anexo.caminhoRelativo];
+    });
+  }
+
   Future<void> inativar(String id, {DateTime? agora}) async {
     final now = agora ?? relogio.agora();
     await _db.transaction(() async {

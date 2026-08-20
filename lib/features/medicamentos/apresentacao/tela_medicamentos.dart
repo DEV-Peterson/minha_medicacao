@@ -12,14 +12,39 @@ import '../../../core/util/formatadores.dart';
 import '../../tratamentos/dominio/modelos_agenda.dart';
 import '../../tratamentos/dominio/recorrencia_persistida.dart';
 import '../dados/medicamento_repository.dart';
+import '../dominio/cadastro_medicamento.dart';
 import 'formulario_medicamento.dart';
 import 'formulario_tratamento.dart';
 
-class TelaMedicamentos extends ConsumerWidget {
+class TelaMedicamentos extends ConsumerStatefulWidget {
   const TelaMedicamentos({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TelaMedicamentos> createState() => _TelaMedicamentosState();
+}
+
+class _TelaMedicamentosState extends ConsumerState<TelaMedicamentos> {
+  final _busca = TextEditingController();
+  var _termo = '';
+  var _mostrarInativos = false;
+
+  @override
+  void dispose() {
+    _busca.dispose();
+    super.dispose();
+  }
+
+  bool _correspondeABusca(MedicamentoResumo item) {
+    if (_termo.isEmpty) return true;
+    final alvo = nomeMedicamento(
+      item.medicamento.nome,
+      item.medicamento.concentracao,
+    ).toLowerCase();
+    return alvo.contains(_termo);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final items = ref.watch(medicamentosProvider);
     return Scaffold(
       body: items.when(
@@ -27,21 +52,105 @@ class TelaMedicamentos extends ConsumerWidget {
         error: (_, _) => const Center(
           child: Text('Não foi possível carregar os medicamentos.'),
         ),
-        data: (data) => data.isEmpty
-            ? const Center(child: Text('Nenhum medicamento cadastrado.'))
-            : ConteudoCentralizado(
-                larguraMaxima: 1100,
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
-                  children: [
+        data: (data) {
+          if (data.isEmpty) {
+            return const Center(child: Text('Nenhum medicamento cadastrado.'));
+          }
+          final ativos = data
+              .where((item) => item.medicamento.ativo)
+              .where(_correspondeABusca)
+              .toList();
+          final inativos = data
+              .where((item) => !item.medicamento.ativo)
+              .where(_correspondeABusca)
+              .toList();
+          // Inativados saem da lista do dia a dia, mas continuam encontráveis:
+          // aparecem assim que houver busca, ou ao abrir a seção.
+          final revelarInativos =
+              inativos.isNotEmpty && (_termo.isNotEmpty || _mostrarInativos);
+
+          return ConteudoCentralizado(
+            larguraMaxima: 1100,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+              children: [
+                if (data.length > 3 || _termo.isNotEmpty)
+                  TextField(
+                    key: const Key('campo_busca_medicamento'),
+                    controller: _busca,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search),
+                      hintText: 'Buscar medicamento',
+                      suffixIcon: _termo.isEmpty
+                          ? null
+                          : IconButton(
+                              tooltip: 'Limpar busca',
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                _busca.clear();
+                                setState(() => _termo = '');
+                              },
+                            ),
+                    ),
+                    onChanged: (valor) =>
+                        setState(() => _termo = valor.trim().toLowerCase()),
+                  ),
+                const SizedBox(height: 12),
+                if (ativos.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 24),
+                    child: Text(
+                      _termo.isEmpty
+                          ? 'Nenhum medicamento ativo.'
+                          : 'Nenhum medicamento ativo encontrado.',
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                else
+                  GradeDeCartoes(
+                    itens: [
+                      for (final item in ativos) _CartaoMedicamento(item: item),
+                    ],
+                  ),
+                if (inativos.isNotEmpty) ...[
+                  const SizedBox(height: 20),
+                  if (_termo.isEmpty)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () => setState(
+                          () => _mostrarInativos = !_mostrarInativos,
+                        ),
+                        icon: Icon(
+                          _mostrarInativos
+                              ? Icons.expand_less
+                              : Icons.expand_more,
+                        ),
+                        label: Text(
+                          '${inativos.length} '
+                          '${inativos.length == 1 ? 'inativado' : 'inativados'}',
+                        ),
+                      ),
+                    ),
+                  if (revelarInativos) ...[
+                    if (_termo.isNotEmpty)
+                      Text(
+                        'Inativados',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    const SizedBox(height: 8),
                     GradeDeCartoes(
                       itens: [
-                        for (final item in data) _CartaoMedicamento(item: item),
+                        for (final item in inativos)
+                          _CartaoMedicamento(item: item),
                       ],
                     ),
                   ],
-                ),
-              ),
+                ],
+              ],
+            ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'adicionar_medicamento',
@@ -255,6 +364,14 @@ class _DetalhesMedicamento extends ConsumerWidget {
                 icon: const Icon(Icons.restart_alt),
                 label: const Text('Reativar medicamento'),
               ),
+            TextButton.icon(
+              onPressed: () => _excluir(context, ref),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              icon: const Icon(Icons.delete_outline),
+              label: const Text('Excluir medicamento'),
+            ),
           ],
         ),
       ),
@@ -321,14 +438,83 @@ class _DetalhesMedicamento extends ConsumerWidget {
     if (context.mounted) Navigator.pop(context);
   }
 
-  Future<void> _inativar(BuildContext context, WidgetRef ref) async {
-    final accepted = await _confirmar(
-      context,
-      title: 'Inativar medicamento?',
-      text:
-          'O medicamento e seu tratamento ativo serão inativados. O histórico será preservado.',
+  /// Exclusão real só existe enquanto não há histórico: serve para corrigir
+  /// um cadastro errado. Com doses registradas, o caminho oferecido é inativar,
+  /// que tira o medicamento da lista sem reescrever o passado.
+  Future<void> _excluir(BuildContext context, WidgetRef ref) async {
+    final repositorio = ref.read(medicamentoRepositoryProvider);
+    final registros = await repositorio.contarRegistrosDose(
+      item.medicamento.id,
     );
-    if (accepted != true || !context.mounted) return;
+    if (!context.mounted) return;
+
+    if (registros > 0) {
+      final inativar = await _confirmar(
+        context,
+        title: 'Não é possível excluir',
+        text:
+            'Este medicamento tem $registros '
+            '${registros == 1 ? 'dose registrada' : 'doses registradas'} no '
+            'histórico. Você pode inativá-lo: ele sai da lista e continua '
+            'aparecendo na busca e no histórico.',
+        confirmar: 'Inativar',
+      );
+      if (inativar == true && context.mounted) {
+        await _inativar(context, ref, confirmado: true);
+      }
+      return;
+    }
+
+    final confirmado = await _confirmar(
+      context,
+      title: 'Excluir medicamento?',
+      text:
+          'O cadastro, o tratamento, as fotos e as movimentações de estoque '
+          'serão apagados definitivamente. Não há histórico de doses a '
+          'preservar.',
+      confirmar: 'Excluir',
+    );
+    if (confirmado != true || !context.mounted) return;
+
+    try {
+      final anexos = await repositorio.excluir(item.medicamento.id);
+      await ref.read(anexoRepositoryProvider).removerArquivos(anexos);
+      await _reconciliarSilenciosamente(ref);
+      ref.invalidate(estoquesComPrevisaoProvider);
+      if (!context.mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Medicamento excluído.')));
+    } on ExclusaoBloqueadaPorHistorico catch (erro) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(erro.mensagem)));
+    } on Object {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível excluir.')),
+      );
+    }
+  }
+
+  Future<void> _inativar(
+    BuildContext context,
+    WidgetRef ref, {
+    bool confirmado = false,
+  }) async {
+    final accepted =
+        confirmado ||
+        await _confirmar(
+              context,
+              title: 'Inativar medicamento?',
+              text:
+                  'O medicamento sai da lista e continua no histórico. Para '
+                  'encontrá-lo depois, use a busca.',
+            ) ==
+            true;
+    if (!accepted || !context.mounted) return;
     await ref.read(medicamentoRepositoryProvider).inativar(item.medicamento.id);
     await _reconciliarSilenciosamente(ref);
     if (context.mounted) Navigator.pop(context);
@@ -750,6 +936,7 @@ Future<bool?> _confirmar(
   BuildContext context, {
   required String title,
   required String text,
+  String confirmar = 'Confirmar',
 }) => showDialog<bool>(
   context: context,
   builder: (context) => AlertDialog(
@@ -762,7 +949,7 @@ Future<bool?> _confirmar(
       ),
       FilledButton(
         onPressed: () => Navigator.pop(context, true),
-        child: const Text('Confirmar'),
+        child: Text(confirmar),
       ),
     ],
   ),

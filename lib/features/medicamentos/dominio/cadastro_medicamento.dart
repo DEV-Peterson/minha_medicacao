@@ -188,6 +188,24 @@ class EdicaoTratamento {
   }
 }
 
+/// Impede apagar um medicamento que já possui doses registradas.
+///
+/// O histórico é a memória do tratamento: apagá-lo junto com o cadastro faria
+/// o passado mudar. Nesse caso o caminho é inativar.
+class ExclusaoBloqueadaPorHistorico implements Exception {
+  const ExclusaoBloqueadaPorHistorico(this.registrosDeDose);
+
+  final int registrosDeDose;
+
+  String get mensagem =>
+      'Este medicamento tem $registrosDeDose '
+      '${registrosDeDose == 1 ? 'dose registrada' : 'doses registradas'} '
+      'e não pode ser excluído.';
+
+  @override
+  String toString() => mensagem;
+}
+
 class FormularioInvalido implements Exception {
   const FormularioInvalido(this.mensagem);
 

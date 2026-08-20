@@ -97,6 +97,19 @@ class AnexoRepository {
       await _armazenamento.excluirSeExistir(anexo.caminhoRelativo);
     });
   }
+
+  /// Remove arquivos cujos vínculos já foram apagados em transação.
+  ///
+  /// Excluir arquivo não participa da transação do banco, então esta etapa
+  /// acontece depois do commit e tolera falha: no pior caso sobra um arquivo
+  /// órfão, nunca uma linha apontando para um arquivo inexistente.
+  Future<void> removerArquivos(Iterable<String> caminhosRelativos) {
+    return _exclusaoMutua.executar(() async {
+      for (final caminho in caminhosRelativos) {
+        await _armazenamento.excluirSeExistir(caminho);
+      }
+    });
+  }
 }
 
 String? _nomeSeguro(String? nome) {
