@@ -523,7 +523,7 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
-            Text('${_quantidadeDose.text} $unit'),
+            Text(formatarDose(lerDecimal(_quantidadeDose.text) ?? 1, unit)),
             Text(times),
             if (recorrencia != null) Text('Repete: $recorrencia'),
             Text(

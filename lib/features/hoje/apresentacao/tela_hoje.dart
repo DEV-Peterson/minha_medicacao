@@ -196,9 +196,7 @@ class _CartaoProximaDose extends StatelessWidget {
               ),
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            Text(
-              '${formatarQuantidade(dose.quantidadeDose)} ${dose.unidadeDose}',
-            ),
+            Text(formatarDose(dose.quantidadeDose, dose.unidadeDose)),
             if (dose.instrucoes case final instructions?) ...[
               const SizedBox(height: 4),
               Text(instructions),
@@ -251,7 +249,10 @@ class _ItemDose extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       Text(
-                        '${formatarQuantidade(item.dose.quantidadeDose)} ${item.dose.unidadeDose}',
+                        formatarDose(
+                          item.dose.quantidadeDose,
+                          item.dose.unidadeDose,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(

@@ -29,6 +29,32 @@ double? lerDecimal(String value) {
   return double.tryParse(normalized);
 }
 
+/// Une quantidade e unidade concordando em número: "1 comprimido",
+/// "2 comprimidos", "20 gotas", "5 mL".
+String formatarDose(num quantidade, String unidade) =>
+    '${formatarQuantidade(quantidade)} ${pluralizarUnidade(unidade, quantidade)}';
+
+/// Flexiona a unidade da dose quando ela é uma palavra.
+///
+/// Símbolos de medida não pluralizam — "5 mL", nunca "5 mLs" —, e são
+/// reconhecidos por serem curtos ou trazerem letra maiúscula.
+String pluralizarUnidade(String unidade, num quantidade) {
+  final valor = unidade.trim();
+  if (valor.isEmpty || quantidade == 1) return valor;
+
+  final ehSimbolo = valor.length <= 3 || valor.contains(RegExp('[A-Z]'));
+  if (ehSimbolo) return valor;
+  if (valor.endsWith('s')) return valor;
+  if (valor.endsWith('ão')) {
+    return '${valor.substring(0, valor.length - 2)}ões';
+  }
+  if (valor.endsWith('l')) {
+    return '${valor.substring(0, valor.length - 1)}is';
+  }
+  if (valor.endsWith('r') || valor.endsWith('z')) return '${valor}es';
+  return '${valor}s';
+}
+
 String nomeMedicamento(String nome, String? concentracao) {
   final detail = concentracao?.trim();
   return detail == null || detail.isEmpty ? nome : '$nome $detail';

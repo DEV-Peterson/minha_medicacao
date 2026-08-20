@@ -130,7 +130,7 @@ class _CartaoEstoque extends ConsumerWidget {
             const SizedBox(height: 4),
             if (medicine.controleEstoque) ...[
               Text(
-                'Restam: ${formatarQuantidade(item.saldo.quantidade)} $unit',
+                'Restam: ${formatarDose(item.saldo.quantidade, unit)}',
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               if (item.previsao?.dataInsuficiente case final date?)
@@ -142,7 +142,7 @@ class _CartaoEstoque extends ConsumerWidget {
               if ((item.previsao?.consumoProximosSeteDias ?? 0) > 0)
                 Text(
                   'Consumo previsto em 7 dias: '
-                  '${formatarQuantidade(item.previsao!.consumoProximosSeteDias)} $unit',
+                  '${formatarDose(item.previsao!.consumoProximosSeteDias, unit)}',
                 ),
               const SizedBox(height: 12),
               Wrap(
