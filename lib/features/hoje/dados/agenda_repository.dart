@@ -5,6 +5,7 @@ import '../../../core/data_hora/data_hora_local.dart';
 import '../../../core/data_hora/relogio.dart';
 import '../../medicamentos/dados/medicamento_repository.dart';
 import '../../tratamentos/dominio/modelos_agenda.dart';
+import '../../tratamentos/dominio/recorrencia_persistida.dart';
 import '../dominio/dose_prevista.dart';
 import '../dominio/gerador_agenda.dart';
 
@@ -137,6 +138,7 @@ class AgendaRepository {
       instrucoes: tratamento.instrucoes,
       ativo: tratamento.ativo,
       regra: regra,
+      recorrencia: RecorrenciaPersistida.doTratamento(tratamento),
     );
   }
 

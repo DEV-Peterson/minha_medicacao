@@ -9,6 +9,8 @@ import '../../../app/providers.dart';
 import '../../../core/arquivos/armazenamento_anexos.dart';
 import '../../../core/banco/app_database.dart';
 import '../../../core/util/formatadores.dart';
+import '../../tratamentos/dominio/modelos_agenda.dart';
+import '../../tratamentos/dominio/recorrencia_persistida.dart';
 import '../dados/medicamento_repository.dart';
 import 'formulario_medicamento.dart';
 import 'formulario_tratamento.dart';
@@ -730,13 +732,18 @@ String _descricaoAgenda(MedicamentoResumo item) {
     final hours = (treatment.intervaloMinutos ?? 0) / 60;
     return 'A cada ${formatarQuantidade(hours)} horas';
   }
-  return item.horarios
+  final horarios = item.horarios
       .map(
         (time) =>
             '${time.hora.toString().padLeft(2, '0')}:'
             '${time.minuto.toString().padLeft(2, '0')}',
       )
       .join(' / ');
+  final recorrencia = RecorrenciaPersistida.doTratamento(treatment);
+  // "Todos os dias" é o caso comum e não precisa aparecer no cartão.
+  return recorrencia is RecorrenciaDiaria
+      ? horarios
+      : '$horarios · ${descreverRecorrencia(recorrencia)}';
 }
 
 Future<bool?> _confirmar(

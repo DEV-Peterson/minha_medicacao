@@ -10,7 +10,7 @@ import 'conversor_data_civil.dart';
 
 part 'app_database.g.dart';
 
-const int versaoSchemaBancoAtual = 2;
+const int versaoSchemaBancoAtual = 3;
 
 @DataClassName('MedicamentoDb')
 @TableIndex(name: 'idx_medicamentos_nome', columns: {#nome})
@@ -62,6 +62,30 @@ class Tratamentos extends Table {
       'intervalo_minutos IS NULL OR intervalo_minutos > 0',
     ),
   )();
+
+  /// Em quais dias os horários fixos valem: diaria, cadaNDias, diasDaSemana
+  /// ou mensal. Tratamentos criados antes desta coluna continuam diários.
+  TextColumn get recorrencia => text()
+      .withLength(min: 1, max: 20)
+      .withDefault(const Constant('diaria'))();
+
+  /// Multiplicador da recorrência: dias, semanas ou meses, conforme o tipo.
+  IntColumn get recorrenciaIntervalo => integer().nullable().check(
+    const CustomExpression(
+      'recorrencia_intervalo IS NULL OR recorrencia_intervalo > 0',
+    ),
+  )();
+
+  /// Dias da semana no padrão de `DateTime.weekday`, separados por vírgula.
+  TextColumn get recorrenciaDiasSemana =>
+      text().withLength(min: 1, max: 20).nullable()();
+
+  IntColumn get recorrenciaDiaDoMes => integer().nullable().check(
+    const CustomExpression(
+      'recorrencia_dia_do_mes IS NULL OR '
+      '(recorrencia_dia_do_mes >= 1 AND recorrencia_dia_do_mes <= 31)',
+    ),
+  )();
   TextColumn get instrucoes => text().nullable()();
   BoolColumn get ativo => boolean().withDefault(const Constant(true))();
   DateTimeColumn get encerradoEm => dateTime().nullable()();
@@ -78,6 +102,11 @@ class Tratamentos extends Table {
     "CHECK (tipo_agendamento IN ('horariosFixos', 'intervalo'))",
     "CHECK ((tipo_agendamento = 'intervalo' AND data_hora_ancora IS NOT NULL "
         "AND intervalo_minutos IS NOT NULL) OR tipo_agendamento = 'horariosFixos')",
+    "CHECK (recorrencia IN ('diaria', 'cadaNDias', 'diasDaSemana', 'mensal'))",
+    "CHECK (recorrencia = 'diaria' OR tipo_agendamento = 'horariosFixos')",
+    "CHECK (recorrencia <> 'cadaNDias' OR recorrencia_intervalo IS NOT NULL)",
+    "CHECK (recorrencia <> 'diasDaSemana' OR recorrencia_dias_semana IS NOT NULL)",
+    "CHECK (recorrencia <> 'mensal' OR recorrencia_dia_do_mes IS NOT NULL)",
   ];
 }
 
@@ -293,6 +322,10 @@ class AppDatabase extends _$AppDatabase {
       if (from > to) {
         throw StateError('Downgrade de banco não é suportado.');
       }
+      // Reconstruir tabela referenciada por outras exige soltar as chaves
+      // estrangeiras durante a migração; a verificação abaixo garante que
+      // nenhum vínculo ficou órfão antes de religá-las.
+      await customStatement('PRAGMA foreign_keys = OFF');
       if (from < 2) {
         // Na v1, o Drift armazenava estas datas como Unix timestamp. A
         // conversão usa o fuso local corrente, exatamente como a leitura da
@@ -318,6 +351,33 @@ class AppDatabase extends _$AppDatabase {
               END
         ''');
       }
+      if (from < 3) {
+        // As colunas são aditivas e os tratamentos existentes passam a valer
+        // como diários, mantendo o comportamento atual. A tabela é recriada
+        // porque o SQLite não permite acrescentar CHECK de tabela por ALTER.
+        await migrator.alterTable(
+          TableMigration(
+            tratamentos,
+            newColumns: [
+              tratamentos.recorrencia,
+              tratamentos.recorrenciaIntervalo,
+              tratamentos.recorrenciaDiasSemana,
+              tratamentos.recorrenciaDiaDoMes,
+            ],
+          ),
+        );
+      }
+
+      final vinculosQuebrados = await customSelect(
+        'PRAGMA foreign_key_check',
+      ).get();
+      if (vinculosQuebrados.isNotEmpty) {
+        throw StateError(
+          'A migração deixaria ${vinculosQuebrados.length} vínculo(s) '
+          'órfão(s); nada foi aplicado.',
+        );
+      }
+      await customStatement('PRAGMA foreign_keys = ON');
     },
     beforeOpen: (_) async {
       await customStatement('PRAGMA foreign_keys = ON');

@@ -856,6 +856,64 @@ class $TratamentosTable extends Tratamentos
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _recorrenciaMeta = const VerificationMeta(
+    'recorrencia',
+  );
+  @override
+  late final GeneratedColumn<String> recorrencia = GeneratedColumn<String>(
+    'recorrencia',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 20,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('diaria'),
+  );
+  static const VerificationMeta _recorrenciaIntervaloMeta =
+      const VerificationMeta('recorrenciaIntervalo');
+  @override
+  late final GeneratedColumn<int> recorrenciaIntervalo = GeneratedColumn<int>(
+    'recorrencia_intervalo',
+    aliasedName,
+    true,
+    check: () => const CustomExpression(
+      'recorrencia_intervalo IS NULL OR recorrencia_intervalo > 0',
+    ),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _recorrenciaDiasSemanaMeta =
+      const VerificationMeta('recorrenciaDiasSemana');
+  @override
+  late final GeneratedColumn<String> recorrenciaDiasSemana =
+      GeneratedColumn<String>(
+        'recorrencia_dias_semana',
+        aliasedName,
+        true,
+        additionalChecks: GeneratedColumn.checkTextLength(
+          minTextLength: 1,
+          maxTextLength: 20,
+        ),
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _recorrenciaDiaDoMesMeta =
+      const VerificationMeta('recorrenciaDiaDoMes');
+  @override
+  late final GeneratedColumn<int> recorrenciaDiaDoMes = GeneratedColumn<int>(
+    'recorrencia_dia_do_mes',
+    aliasedName,
+    true,
+    check: () => const CustomExpression(
+      'recorrencia_dia_do_mes IS NULL OR '
+      '(recorrencia_dia_do_mes >= 1 AND recorrencia_dia_do_mes <= 31)',
+    ),
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _instrucoesMeta = const VerificationMeta(
     'instrucoes',
   );
@@ -926,6 +984,10 @@ class $TratamentosTable extends Tratamentos
     tipoAgendamento,
     dataHoraAncora,
     intervaloMinutos,
+    recorrencia,
+    recorrenciaIntervalo,
+    recorrenciaDiasSemana,
+    recorrenciaDiaDoMes,
     instrucoes,
     ativo,
     encerradoEm,
@@ -1031,6 +1093,42 @@ class $TratamentosTable extends Tratamentos
         ),
       );
     }
+    if (data.containsKey('recorrencia')) {
+      context.handle(
+        _recorrenciaMeta,
+        recorrencia.isAcceptableOrUnknown(
+          data['recorrencia']!,
+          _recorrenciaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('recorrencia_intervalo')) {
+      context.handle(
+        _recorrenciaIntervaloMeta,
+        recorrenciaIntervalo.isAcceptableOrUnknown(
+          data['recorrencia_intervalo']!,
+          _recorrenciaIntervaloMeta,
+        ),
+      );
+    }
+    if (data.containsKey('recorrencia_dias_semana')) {
+      context.handle(
+        _recorrenciaDiasSemanaMeta,
+        recorrenciaDiasSemana.isAcceptableOrUnknown(
+          data['recorrencia_dias_semana']!,
+          _recorrenciaDiasSemanaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('recorrencia_dia_do_mes')) {
+      context.handle(
+        _recorrenciaDiaDoMesMeta,
+        recorrenciaDiaDoMes.isAcceptableOrUnknown(
+          data['recorrencia_dia_do_mes']!,
+          _recorrenciaDiaDoMesMeta,
+        ),
+      );
+    }
     if (data.containsKey('instrucoes')) {
       context.handle(
         _instrucoesMeta,
@@ -1128,6 +1226,22 @@ class $TratamentosTable extends Tratamentos
         DriftSqlType.int,
         data['${effectivePrefix}intervalo_minutos'],
       ),
+      recorrencia: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recorrencia'],
+      )!,
+      recorrenciaIntervalo: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recorrencia_intervalo'],
+      ),
+      recorrenciaDiasSemana: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recorrencia_dias_semana'],
+      ),
+      recorrenciaDiaDoMes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}recorrencia_dia_do_mes'],
+      ),
       instrucoes: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}instrucoes'],
@@ -1176,6 +1290,17 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
   final String tipoAgendamento;
   final DateTime? dataHoraAncora;
   final int? intervaloMinutos;
+
+  /// Em quais dias os horários fixos valem: diaria, cadaNDias, diasDaSemana
+  /// ou mensal. Tratamentos criados antes desta coluna continuam diários.
+  final String recorrencia;
+
+  /// Multiplicador da recorrência: dias, semanas ou meses, conforme o tipo.
+  final int? recorrenciaIntervalo;
+
+  /// Dias da semana no padrão de `DateTime.weekday`, separados por vírgula.
+  final String? recorrenciaDiasSemana;
+  final int? recorrenciaDiaDoMes;
   final String? instrucoes;
   final bool ativo;
   final DateTime? encerradoEm;
@@ -1193,6 +1318,10 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
     required this.tipoAgendamento,
     this.dataHoraAncora,
     this.intervaloMinutos,
+    required this.recorrencia,
+    this.recorrenciaIntervalo,
+    this.recorrenciaDiasSemana,
+    this.recorrenciaDiaDoMes,
     this.instrucoes,
     required this.ativo,
     this.encerradoEm,
@@ -1227,6 +1356,16 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
     if (!nullToAbsent || intervaloMinutos != null) {
       map['intervalo_minutos'] = Variable<int>(intervaloMinutos);
     }
+    map['recorrencia'] = Variable<String>(recorrencia);
+    if (!nullToAbsent || recorrenciaIntervalo != null) {
+      map['recorrencia_intervalo'] = Variable<int>(recorrenciaIntervalo);
+    }
+    if (!nullToAbsent || recorrenciaDiasSemana != null) {
+      map['recorrencia_dias_semana'] = Variable<String>(recorrenciaDiasSemana);
+    }
+    if (!nullToAbsent || recorrenciaDiaDoMes != null) {
+      map['recorrencia_dia_do_mes'] = Variable<int>(recorrenciaDiaDoMes);
+    }
     if (!nullToAbsent || instrucoes != null) {
       map['instrucoes'] = Variable<String>(instrucoes);
     }
@@ -1260,6 +1399,16 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
       intervaloMinutos: intervaloMinutos == null && nullToAbsent
           ? const Value.absent()
           : Value(intervaloMinutos),
+      recorrencia: Value(recorrencia),
+      recorrenciaIntervalo: recorrenciaIntervalo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(recorrenciaIntervalo),
+      recorrenciaDiasSemana: recorrenciaDiasSemana == null && nullToAbsent
+          ? const Value.absent()
+          : Value(recorrenciaDiasSemana),
+      recorrenciaDiaDoMes: recorrenciaDiaDoMes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(recorrenciaDiaDoMes),
       instrucoes: instrucoes == null && nullToAbsent
           ? const Value.absent()
           : Value(instrucoes),
@@ -1291,6 +1440,16 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
       tipoAgendamento: serializer.fromJson<String>(json['tipoAgendamento']),
       dataHoraAncora: serializer.fromJson<DateTime?>(json['dataHoraAncora']),
       intervaloMinutos: serializer.fromJson<int?>(json['intervaloMinutos']),
+      recorrencia: serializer.fromJson<String>(json['recorrencia']),
+      recorrenciaIntervalo: serializer.fromJson<int?>(
+        json['recorrenciaIntervalo'],
+      ),
+      recorrenciaDiasSemana: serializer.fromJson<String?>(
+        json['recorrenciaDiasSemana'],
+      ),
+      recorrenciaDiaDoMes: serializer.fromJson<int?>(
+        json['recorrenciaDiaDoMes'],
+      ),
       instrucoes: serializer.fromJson<String?>(json['instrucoes']),
       ativo: serializer.fromJson<bool>(json['ativo']),
       encerradoEm: serializer.fromJson<DateTime?>(json['encerradoEm']),
@@ -1315,6 +1474,12 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
       'tipoAgendamento': serializer.toJson<String>(tipoAgendamento),
       'dataHoraAncora': serializer.toJson<DateTime?>(dataHoraAncora),
       'intervaloMinutos': serializer.toJson<int?>(intervaloMinutos),
+      'recorrencia': serializer.toJson<String>(recorrencia),
+      'recorrenciaIntervalo': serializer.toJson<int?>(recorrenciaIntervalo),
+      'recorrenciaDiasSemana': serializer.toJson<String?>(
+        recorrenciaDiasSemana,
+      ),
+      'recorrenciaDiaDoMes': serializer.toJson<int?>(recorrenciaDiaDoMes),
       'instrucoes': serializer.toJson<String?>(instrucoes),
       'ativo': serializer.toJson<bool>(ativo),
       'encerradoEm': serializer.toJson<DateTime?>(encerradoEm),
@@ -1335,6 +1500,10 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
     String? tipoAgendamento,
     Value<DateTime?> dataHoraAncora = const Value.absent(),
     Value<int?> intervaloMinutos = const Value.absent(),
+    String? recorrencia,
+    Value<int?> recorrenciaIntervalo = const Value.absent(),
+    Value<String?> recorrenciaDiasSemana = const Value.absent(),
+    Value<int?> recorrenciaDiaDoMes = const Value.absent(),
     Value<String?> instrucoes = const Value.absent(),
     bool? ativo,
     Value<DateTime?> encerradoEm = const Value.absent(),
@@ -1358,6 +1527,16 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
     intervaloMinutos: intervaloMinutos.present
         ? intervaloMinutos.value
         : this.intervaloMinutos,
+    recorrencia: recorrencia ?? this.recorrencia,
+    recorrenciaIntervalo: recorrenciaIntervalo.present
+        ? recorrenciaIntervalo.value
+        : this.recorrenciaIntervalo,
+    recorrenciaDiasSemana: recorrenciaDiasSemana.present
+        ? recorrenciaDiasSemana.value
+        : this.recorrenciaDiasSemana,
+    recorrenciaDiaDoMes: recorrenciaDiaDoMes.present
+        ? recorrenciaDiaDoMes.value
+        : this.recorrenciaDiaDoMes,
     instrucoes: instrucoes.present ? instrucoes.value : this.instrucoes,
     ativo: ativo ?? this.ativo,
     encerradoEm: encerradoEm.present ? encerradoEm.value : this.encerradoEm,
@@ -1395,6 +1574,18 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
       intervaloMinutos: data.intervaloMinutos.present
           ? data.intervaloMinutos.value
           : this.intervaloMinutos,
+      recorrencia: data.recorrencia.present
+          ? data.recorrencia.value
+          : this.recorrencia,
+      recorrenciaIntervalo: data.recorrenciaIntervalo.present
+          ? data.recorrenciaIntervalo.value
+          : this.recorrenciaIntervalo,
+      recorrenciaDiasSemana: data.recorrenciaDiasSemana.present
+          ? data.recorrenciaDiasSemana.value
+          : this.recorrenciaDiasSemana,
+      recorrenciaDiaDoMes: data.recorrenciaDiaDoMes.present
+          ? data.recorrenciaDiaDoMes.value
+          : this.recorrenciaDiaDoMes,
       instrucoes: data.instrucoes.present
           ? data.instrucoes.value
           : this.instrucoes,
@@ -1423,6 +1614,10 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
           ..write('tipoAgendamento: $tipoAgendamento, ')
           ..write('dataHoraAncora: $dataHoraAncora, ')
           ..write('intervaloMinutos: $intervaloMinutos, ')
+          ..write('recorrencia: $recorrencia, ')
+          ..write('recorrenciaIntervalo: $recorrenciaIntervalo, ')
+          ..write('recorrenciaDiasSemana: $recorrenciaDiasSemana, ')
+          ..write('recorrenciaDiaDoMes: $recorrenciaDiaDoMes, ')
           ..write('instrucoes: $instrucoes, ')
           ..write('ativo: $ativo, ')
           ..write('encerradoEm: $encerradoEm, ')
@@ -1445,6 +1640,10 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
     tipoAgendamento,
     dataHoraAncora,
     intervaloMinutos,
+    recorrencia,
+    recorrenciaIntervalo,
+    recorrenciaDiasSemana,
+    recorrenciaDiaDoMes,
     instrucoes,
     ativo,
     encerradoEm,
@@ -1466,6 +1665,10 @@ class TratamentoDb extends DataClass implements Insertable<TratamentoDb> {
           other.tipoAgendamento == this.tipoAgendamento &&
           other.dataHoraAncora == this.dataHoraAncora &&
           other.intervaloMinutos == this.intervaloMinutos &&
+          other.recorrencia == this.recorrencia &&
+          other.recorrenciaIntervalo == this.recorrenciaIntervalo &&
+          other.recorrenciaDiasSemana == this.recorrenciaDiasSemana &&
+          other.recorrenciaDiaDoMes == this.recorrenciaDiaDoMes &&
           other.instrucoes == this.instrucoes &&
           other.ativo == this.ativo &&
           other.encerradoEm == this.encerradoEm &&
@@ -1485,6 +1688,10 @@ class TratamentosCompanion extends UpdateCompanion<TratamentoDb> {
   final Value<String> tipoAgendamento;
   final Value<DateTime?> dataHoraAncora;
   final Value<int?> intervaloMinutos;
+  final Value<String> recorrencia;
+  final Value<int?> recorrenciaIntervalo;
+  final Value<String?> recorrenciaDiasSemana;
+  final Value<int?> recorrenciaDiaDoMes;
   final Value<String?> instrucoes;
   final Value<bool> ativo;
   final Value<DateTime?> encerradoEm;
@@ -1503,6 +1710,10 @@ class TratamentosCompanion extends UpdateCompanion<TratamentoDb> {
     this.tipoAgendamento = const Value.absent(),
     this.dataHoraAncora = const Value.absent(),
     this.intervaloMinutos = const Value.absent(),
+    this.recorrencia = const Value.absent(),
+    this.recorrenciaIntervalo = const Value.absent(),
+    this.recorrenciaDiasSemana = const Value.absent(),
+    this.recorrenciaDiaDoMes = const Value.absent(),
     this.instrucoes = const Value.absent(),
     this.ativo = const Value.absent(),
     this.encerradoEm = const Value.absent(),
@@ -1522,6 +1733,10 @@ class TratamentosCompanion extends UpdateCompanion<TratamentoDb> {
     required String tipoAgendamento,
     this.dataHoraAncora = const Value.absent(),
     this.intervaloMinutos = const Value.absent(),
+    this.recorrencia = const Value.absent(),
+    this.recorrenciaIntervalo = const Value.absent(),
+    this.recorrenciaDiasSemana = const Value.absent(),
+    this.recorrenciaDiaDoMes = const Value.absent(),
     this.instrucoes = const Value.absent(),
     this.ativo = const Value.absent(),
     this.encerradoEm = const Value.absent(),
@@ -1549,6 +1764,10 @@ class TratamentosCompanion extends UpdateCompanion<TratamentoDb> {
     Expression<String>? tipoAgendamento,
     Expression<DateTime>? dataHoraAncora,
     Expression<int>? intervaloMinutos,
+    Expression<String>? recorrencia,
+    Expression<int>? recorrenciaIntervalo,
+    Expression<String>? recorrenciaDiasSemana,
+    Expression<int>? recorrenciaDiaDoMes,
     Expression<String>? instrucoes,
     Expression<bool>? ativo,
     Expression<DateTime>? encerradoEm,
@@ -1569,6 +1788,13 @@ class TratamentosCompanion extends UpdateCompanion<TratamentoDb> {
       if (tipoAgendamento != null) 'tipo_agendamento': tipoAgendamento,
       if (dataHoraAncora != null) 'data_hora_ancora': dataHoraAncora,
       if (intervaloMinutos != null) 'intervalo_minutos': intervaloMinutos,
+      if (recorrencia != null) 'recorrencia': recorrencia,
+      if (recorrenciaIntervalo != null)
+        'recorrencia_intervalo': recorrenciaIntervalo,
+      if (recorrenciaDiasSemana != null)
+        'recorrencia_dias_semana': recorrenciaDiasSemana,
+      if (recorrenciaDiaDoMes != null)
+        'recorrencia_dia_do_mes': recorrenciaDiaDoMes,
       if (instrucoes != null) 'instrucoes': instrucoes,
       if (ativo != null) 'ativo': ativo,
       if (encerradoEm != null) 'encerrado_em': encerradoEm,
@@ -1590,6 +1816,10 @@ class TratamentosCompanion extends UpdateCompanion<TratamentoDb> {
     Value<String>? tipoAgendamento,
     Value<DateTime?>? dataHoraAncora,
     Value<int?>? intervaloMinutos,
+    Value<String>? recorrencia,
+    Value<int?>? recorrenciaIntervalo,
+    Value<String?>? recorrenciaDiasSemana,
+    Value<int?>? recorrenciaDiaDoMes,
     Value<String?>? instrucoes,
     Value<bool>? ativo,
     Value<DateTime?>? encerradoEm,
@@ -1610,6 +1840,11 @@ class TratamentosCompanion extends UpdateCompanion<TratamentoDb> {
       tipoAgendamento: tipoAgendamento ?? this.tipoAgendamento,
       dataHoraAncora: dataHoraAncora ?? this.dataHoraAncora,
       intervaloMinutos: intervaloMinutos ?? this.intervaloMinutos,
+      recorrencia: recorrencia ?? this.recorrencia,
+      recorrenciaIntervalo: recorrenciaIntervalo ?? this.recorrenciaIntervalo,
+      recorrenciaDiasSemana:
+          recorrenciaDiasSemana ?? this.recorrenciaDiasSemana,
+      recorrenciaDiaDoMes: recorrenciaDiaDoMes ?? this.recorrenciaDiaDoMes,
       instrucoes: instrucoes ?? this.instrucoes,
       ativo: ativo ?? this.ativo,
       encerradoEm: encerradoEm ?? this.encerradoEm,
@@ -1661,6 +1896,20 @@ class TratamentosCompanion extends UpdateCompanion<TratamentoDb> {
     if (intervaloMinutos.present) {
       map['intervalo_minutos'] = Variable<int>(intervaloMinutos.value);
     }
+    if (recorrencia.present) {
+      map['recorrencia'] = Variable<String>(recorrencia.value);
+    }
+    if (recorrenciaIntervalo.present) {
+      map['recorrencia_intervalo'] = Variable<int>(recorrenciaIntervalo.value);
+    }
+    if (recorrenciaDiasSemana.present) {
+      map['recorrencia_dias_semana'] = Variable<String>(
+        recorrenciaDiasSemana.value,
+      );
+    }
+    if (recorrenciaDiaDoMes.present) {
+      map['recorrencia_dia_do_mes'] = Variable<int>(recorrenciaDiaDoMes.value);
+    }
     if (instrucoes.present) {
       map['instrucoes'] = Variable<String>(instrucoes.value);
     }
@@ -1696,6 +1945,10 @@ class TratamentosCompanion extends UpdateCompanion<TratamentoDb> {
           ..write('tipoAgendamento: $tipoAgendamento, ')
           ..write('dataHoraAncora: $dataHoraAncora, ')
           ..write('intervaloMinutos: $intervaloMinutos, ')
+          ..write('recorrencia: $recorrencia, ')
+          ..write('recorrenciaIntervalo: $recorrenciaIntervalo, ')
+          ..write('recorrenciaDiasSemana: $recorrenciaDiasSemana, ')
+          ..write('recorrenciaDiaDoMes: $recorrenciaDiaDoMes, ')
           ..write('instrucoes: $instrucoes, ')
           ..write('ativo: $ativo, ')
           ..write('encerradoEm: $encerradoEm, ')
@@ -5692,6 +5945,10 @@ typedef $$TratamentosTableCreateCompanionBuilder =
       required String tipoAgendamento,
       Value<DateTime?> dataHoraAncora,
       Value<int?> intervaloMinutos,
+      Value<String> recorrencia,
+      Value<int?> recorrenciaIntervalo,
+      Value<String?> recorrenciaDiasSemana,
+      Value<int?> recorrenciaDiaDoMes,
       Value<String?> instrucoes,
       Value<bool> ativo,
       Value<DateTime?> encerradoEm,
@@ -5712,6 +5969,10 @@ typedef $$TratamentosTableUpdateCompanionBuilder =
       Value<String> tipoAgendamento,
       Value<DateTime?> dataHoraAncora,
       Value<int?> intervaloMinutos,
+      Value<String> recorrencia,
+      Value<int?> recorrenciaIntervalo,
+      Value<String?> recorrenciaDiasSemana,
+      Value<int?> recorrenciaDiaDoMes,
       Value<String?> instrucoes,
       Value<bool> ativo,
       Value<DateTime?> encerradoEm,
@@ -5861,6 +6122,26 @@ class $$TratamentosTableFilterComposer
 
   ColumnFilters<int> get intervaloMinutos => $composableBuilder(
     column: $table.intervaloMinutos,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recorrencia => $composableBuilder(
+    column: $table.recorrencia,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get recorrenciaIntervalo => $composableBuilder(
+    column: $table.recorrenciaIntervalo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recorrenciaDiasSemana => $composableBuilder(
+    column: $table.recorrenciaDiasSemana,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get recorrenciaDiaDoMes => $composableBuilder(
+    column: $table.recorrenciaDiaDoMes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6047,6 +6328,26 @@ class $$TratamentosTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get recorrencia => $composableBuilder(
+    column: $table.recorrencia,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get recorrenciaIntervalo => $composableBuilder(
+    column: $table.recorrenciaIntervalo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recorrenciaDiasSemana => $composableBuilder(
+    column: $table.recorrenciaDiasSemana,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get recorrenciaDiaDoMes => $composableBuilder(
+    column: $table.recorrenciaDiaDoMes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get instrucoes => $composableBuilder(
     column: $table.instrucoes,
     builder: (column) => ColumnOrderings(column),
@@ -6149,6 +6450,26 @@ class $$TratamentosTableAnnotationComposer
 
   GeneratedColumn<int> get intervaloMinutos => $composableBuilder(
     column: $table.intervaloMinutos,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get recorrencia => $composableBuilder(
+    column: $table.recorrencia,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get recorrenciaIntervalo => $composableBuilder(
+    column: $table.recorrenciaIntervalo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get recorrenciaDiasSemana => $composableBuilder(
+    column: $table.recorrenciaDiasSemana,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get recorrenciaDiaDoMes => $composableBuilder(
+    column: $table.recorrenciaDiaDoMes,
     builder: (column) => column,
   );
 
@@ -6317,6 +6638,10 @@ class $$TratamentosTableTableManager
                 Value<String> tipoAgendamento = const Value.absent(),
                 Value<DateTime?> dataHoraAncora = const Value.absent(),
                 Value<int?> intervaloMinutos = const Value.absent(),
+                Value<String> recorrencia = const Value.absent(),
+                Value<int?> recorrenciaIntervalo = const Value.absent(),
+                Value<String?> recorrenciaDiasSemana = const Value.absent(),
+                Value<int?> recorrenciaDiaDoMes = const Value.absent(),
                 Value<String?> instrucoes = const Value.absent(),
                 Value<bool> ativo = const Value.absent(),
                 Value<DateTime?> encerradoEm = const Value.absent(),
@@ -6335,6 +6660,10 @@ class $$TratamentosTableTableManager
                 tipoAgendamento: tipoAgendamento,
                 dataHoraAncora: dataHoraAncora,
                 intervaloMinutos: intervaloMinutos,
+                recorrencia: recorrencia,
+                recorrenciaIntervalo: recorrenciaIntervalo,
+                recorrenciaDiasSemana: recorrenciaDiasSemana,
+                recorrenciaDiaDoMes: recorrenciaDiaDoMes,
                 instrucoes: instrucoes,
                 ativo: ativo,
                 encerradoEm: encerradoEm,
@@ -6355,6 +6684,10 @@ class $$TratamentosTableTableManager
                 required String tipoAgendamento,
                 Value<DateTime?> dataHoraAncora = const Value.absent(),
                 Value<int?> intervaloMinutos = const Value.absent(),
+                Value<String> recorrencia = const Value.absent(),
+                Value<int?> recorrenciaIntervalo = const Value.absent(),
+                Value<String?> recorrenciaDiasSemana = const Value.absent(),
+                Value<int?> recorrenciaDiaDoMes = const Value.absent(),
                 Value<String?> instrucoes = const Value.absent(),
                 Value<bool> ativo = const Value.absent(),
                 Value<DateTime?> encerradoEm = const Value.absent(),
@@ -6373,6 +6706,10 @@ class $$TratamentosTableTableManager
                 tipoAgendamento: tipoAgendamento,
                 dataHoraAncora: dataHoraAncora,
                 intervaloMinutos: intervaloMinutos,
+                recorrencia: recorrencia,
+                recorrenciaIntervalo: recorrenciaIntervalo,
+                recorrenciaDiasSemana: recorrenciaDiasSemana,
+                recorrenciaDiaDoMes: recorrenciaDiaDoMes,
                 instrucoes: instrucoes,
                 ativo: ativo,
                 encerradoEm: encerradoEm,

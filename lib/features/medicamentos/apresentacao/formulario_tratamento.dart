@@ -5,7 +5,10 @@ import '../../../app/layout.dart';
 import '../../../app/providers.dart';
 import '../../../core/util/formatadores.dart';
 import '../dados/medicamento_repository.dart';
+import '../../tratamentos/dominio/modelos_agenda.dart';
+import '../../tratamentos/dominio/recorrencia_persistida.dart';
 import '../dominio/cadastro_medicamento.dart';
+import 'seletor_recorrencia.dart';
 
 class FormularioTratamento extends ConsumerStatefulWidget {
   const FormularioTratamento({required this.item, super.key});
@@ -31,6 +34,7 @@ class _FormularioTratamentoState extends ConsumerState<FormularioTratamento> {
   late DateTime _ancora;
   late List<TimeOfDay> _horarios;
   late final bool _criando;
+  late RecorrenciaDias _recorrencia;
   var _saving = false;
 
   @override
@@ -62,6 +66,9 @@ class _FormularioTratamentoState extends ConsumerState<FormularioTratamento> {
       oldAnchor?.hour ?? 8,
       oldAnchor?.minute ?? 0,
     );
+    _recorrencia = treatment == null
+        ? const RecorrenciaDiaria()
+        : RecorrenciaPersistida.doTratamento(treatment);
     _quantidade = TextEditingController(
       text: formatarQuantidade(treatment?.quantidadeDose ?? 1),
     );
@@ -223,6 +230,11 @@ class _FormularioTratamentoState extends ConsumerState<FormularioTratamento> {
                   icon: const Icon(Icons.add),
                   label: const Text('Adicionar horário'),
                 ),
+                const SizedBox(height: 20),
+                SeletorRecorrencia(
+                  valor: _recorrencia,
+                  aoAlterar: (valor) => setState(() => _recorrencia = valor),
+                ),
               ] else ...[
                 TextFormField(
                   controller: _intervalo,
@@ -309,6 +321,9 @@ class _FormularioTratamentoState extends ConsumerState<FormularioTratamento> {
           ? (intervalHours * 60).round()
           : null,
       instrucoes: _instrucoes.text,
+      recorrencia: _tipo == TipoAgendamentoCadastro.horariosFixos
+          ? _recorrencia
+          : const RecorrenciaDiaria(),
       consumoEstoquePorDose: widget.item.medicamento.controleEstoque
           ? lerDecimal(_consumo.text)
           : null,
