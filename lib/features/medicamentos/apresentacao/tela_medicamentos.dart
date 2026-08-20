@@ -282,8 +282,10 @@ class _DetalhesMedicamento extends ConsumerWidget {
                     ListTile(
                       title: const Text('Dose'),
                       subtitle: Text(
-                        '${formatarQuantidade(treatment.quantidadeDose)} '
-                        '${treatment.unidadeDose}',
+                        formatarDose(
+                          treatment.quantidadeDose,
+                          treatment.unidadeDose,
+                        ),
                       ),
                     ),
                     ListTile(

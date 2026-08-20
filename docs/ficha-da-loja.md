@@ -151,17 +151,23 @@ sincronização, não coleta dados e não possui servidor.
 | E-mail de suporte | `petersonmarinho07@hotmail.com` |
 | Site (opcional) | `https://github.com/DEV-Peterson/minha_medicacao` |
 
-## Capturas de tela — roteiro sugerido
+## Capturas de tela
 
-Mínimo de 2, ideal 5 a 8. Tire no aparelho com dados realistas já cadastrados,
-**depois** dos ajustes de tema escuro (senão você refaz).
+Prontas em `docs/loja/capturas/`, todas em **1344 × 2992** (proporção 9:20,
+dentro do que o Console aceita). Foram feitas na versão 1.6.0 com dados de
+exemplo, em um Pixel 10 Pro XL com Android 17.
 
-1. **Hoje** com a próxima dose destacada e duas ou três doses no dia
-2. **Hoje** com uma dose já confirmada, mostrando "Tomada às 08:07"
-3. **Estoque** com um item em "Precisa repor em breve"
-4. **Medicamentos** com dois ou três remédios cadastrados
-5. **Histórico** com dias agrupados
-6. **Cadastro** no passo de horários, mostrando a repetição semanal
-7. Uma captura no **tema escuro**, para quem usa o celular à noite
+| Arquivo | O que mostra |
+| --- | --- |
+| `1-hoje.png` | Agenda do dia com doses confirmadas e a próxima dose |
+| `2-hoje-tema-escuro.png` | A mesma tela no tema escuro |
+| `3-estoque.png` | Os três grupos, com um item em "Precisa repor em breve" |
+| `4-medicamentos.png` | Lista com três medicamentos e agendas diferentes |
+| `5-historico.png` | Histórico do dia com as doses tomadas |
+| `6-repeticao-semanal.png` | Cadastro com repetição em dias da semana |
 
-Para distribuição em tablets, repetir as principais em 7" e 10".
+Sugestão de ordem no Console: 1, 3, 5, 6, 2 — começando pelo uso diário e
+deixando o tema escuro por último, como diferencial.
+
+Para distribuição em tablets, são necessárias capturas próprias em 7" e 10",
+que podem sair do mesmo emulador trocando o perfil do dispositivo.
