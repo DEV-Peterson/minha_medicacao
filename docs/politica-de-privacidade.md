@@ -14,7 +14,7 @@ compartilha nenhum dado seu.** Tudo fica no seu aparelho.
 O aplicativo é desenvolvido e mantido por Peterson Rocha, pessoa física.
 
 Contato para dúvidas sobre privacidade e sobre o aplicativo:
-**[DEFINIR E-MAIL DE SUPORTE]**
+**petersonmarinho07@hotmail.com**
 
 ## Que informações o aplicativo guarda
 

@@ -16,7 +16,7 @@ internet, sem cadastro e sem anúncios.
 
 Encontrou um problema ou tem uma sugestão? Abra uma
 [issue no repositório](https://github.com/DEV-Peterson/minha_medicacao/issues)
-ou escreva para o e-mail de suporte informado na ficha do aplicativo.
+ou escreva para **petersonmarinho07@hotmail.com**.
 
 ---
 

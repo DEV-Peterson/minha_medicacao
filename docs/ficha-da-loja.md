@@ -148,7 +148,7 @@ sincronização, não coleta dados e não possui servidor.
 | Campo | Endereço |
 | --- | --- |
 | Política de privacidade | `https://dev-peterson.github.io/minha_medicacao/politica-de-privacidade` |
-| E-mail de suporte | *a definir* |
+| E-mail de suporte | `petersonmarinho07@hotmail.com` |
 | Site (opcional) | `https://github.com/DEV-Peterson/minha_medicacao` |
 
 ## Capturas de tela — roteiro sugerido

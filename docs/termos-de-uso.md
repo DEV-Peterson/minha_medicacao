@@ -81,4 +81,4 @@ histórico fica disponível no repositório público do projeto.
 
 ## Contato
 
-**[DEFINIR E-MAIL DE SUPORTE]**
+**petersonmarinho07@hotmail.com**
