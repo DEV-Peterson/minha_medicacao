@@ -156,9 +156,13 @@ As diferenças entre versões do Android ficam concentradas nos lembretes:
 
 - `POST_NOTIFICATIONS` só existe no Android 13+; abaixo disso o plugin informa
   o estado real das notificações;
-- `SCHEDULE_EXACT_ALARM` vale até o Android 12L e `USE_EXACT_ALARM` a partir do
-  Android 13; abaixo do Android 12 o alarme exato é concedido pelo sistema e a
-  verificação de saúde responde “habilitado”;
+- o alarme exato usa apenas `SCHEDULE_EXACT_ALARM`. Abaixo do Android 12 o
+  sistema concede sozinho; do Android 14 em diante a usuária precisa conceder,
+  e o aplicativo pede na primeira abertura. `USE_EXACT_ALARM` não é declarada
+  de propósito: o Google a reserva a despertadores e agendas, e o formulário do
+  Console não admite outro enquadramento. Sem a concessão, os lembretes são
+  agendados em modo inexato — chegam com alguns minutos de janela em vez de não
+  chegar;
 - canais de notificação existem a partir do Android 8; em versões anteriores a
   verificação de canal é considerada satisfeita.
 

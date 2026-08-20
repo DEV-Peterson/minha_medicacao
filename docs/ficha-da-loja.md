@@ -124,24 +124,25 @@ O app se enquadra em **gerenciamento de medicamentos**. Pontos a declarar:
 - destina-se a organização pessoal de tratamento já prescrito;
 - não é destinado a profissionais de saúde nem a uso institucional.
 
-## Justificativa da permissão de alarme exato
+## Alarme exato — por que não declaramos USE_EXACT_ALARM
 
-Texto para o formulário de permissões restritas, ao declarar
-`USE_EXACT_ALARM`:
+O formulário de alarmes exatos do Console oferece apenas duas respostas para a
+função principal do app: "despertador" ou "agenda". Um lembrete de medicação
+não é honestamente nenhuma das duas, e o próprio texto do formulário diz que,
+fora esses casos, o app não tem qualificação e a permissão precisa ser
+removida.
 
-```
-A função central do aplicativo é lembrar o usuário de tomar medicamentos em
-horários prescritos. Um lembrete de medicação entregue fora do horário perde a
-utilidade e pode induzir o usuário a tomar a dose no momento errado, por isso o
-aplicativo agenda notificações no horário exato definido pelo próprio usuário
-ao cadastrar o tratamento.
+Por isso o aplicativo declara somente `SCHEDULE_EXACT_ALARM`, que a própria
+usuária concede em Configurações do Android. Medido em aparelho:
 
-Os alarmes são todos criados a partir de horários que o usuário cadastra
-explicitamente e correspondem a eventos visíveis para ele: cada alarme gera uma
-notificação com o nome do medicamento e a quantidade a ser tomada. O aplicativo
-não usa alarmes exatos para nenhuma finalidade em segundo plano, não realiza
-sincronização, não coleta dados e não possui servidor.
-```
+| Situação | Resultado |
+| --- | --- |
+| Permissão concedida | `window=0`, alarme exato — mesma precisão de antes |
+| Permissão negada | `window=1h`, o lembrete continua sendo agendado |
+
+O aplicativo pede a permissão na primeira abertura e mostra o estado em
+Configurações → Lembretes. Sem ela, nada deixa de funcionar: os avisos apenas
+podem atrasar alguns minutos.
 
 ## Links obrigatórios
 
