@@ -1,3 +1,5 @@
+import '../../tratamentos/dominio/modelos_agenda.dart';
+
 class HorarioCadastro implements Comparable<HorarioCadastro> {
   const HorarioCadastro(this.hora, this.minuto)
     : assert(hora >= 0 && hora <= 23),
@@ -37,6 +39,7 @@ class CadastroMedicamento {
     this.dataHoraAncora,
     this.intervaloMinutos,
     this.instrucoes,
+    this.recorrencia = const RecorrenciaDiaria(),
     this.controlarEstoque = false,
     this.unidadeEstoque,
     this.estoqueInicial,
@@ -58,6 +61,7 @@ class CadastroMedicamento {
   final DateTime? dataHoraAncora;
   final int? intervaloMinutos;
   final String? instrucoes;
+  final RecorrenciaDias recorrencia;
   final bool controlarEstoque;
   final String? unidadeEstoque;
   final double? estoqueInicial;
@@ -97,6 +101,7 @@ class CadastroMedicamento {
         'Informe a primeira dose e um intervalo maior que zero.',
       );
     }
+    _validarRecorrencia(tipoAgendamento, recorrencia);
     if (controlarEstoque) {
       if ((unidadeEstoque ?? '').trim().isEmpty) {
         throw const FormularioInvalido('Informe a unidade usada no estoque.');
@@ -127,6 +132,7 @@ class EdicaoTratamento {
     this.dataHoraAncora,
     this.intervaloMinutos,
     this.instrucoes,
+    this.recorrencia = const RecorrenciaDiaria(),
     this.consumoEstoquePorDose,
   });
 
@@ -140,6 +146,7 @@ class EdicaoTratamento {
   final DateTime? dataHoraAncora;
   final int? intervaloMinutos;
   final String? instrucoes;
+  final RecorrenciaDias recorrencia;
   final double? consumoEstoquePorDose;
 
   void validar({required bool controlaEstoque}) {
@@ -172,6 +179,7 @@ class EdicaoTratamento {
         'Informe a primeira dose e um intervalo maior que zero.',
       );
     }
+    _validarRecorrencia(tipoAgendamento, recorrencia);
     if (controlaEstoque && (consumoEstoquePorDose ?? 0) <= 0) {
       throw const FormularioInvalido(
         'Informe um consumo de estoque por dose maior que zero.',
@@ -191,3 +199,17 @@ class FormularioInvalido implements Exception {
 
 DateTime _somenteData(DateTime value) =>
     DateTime(value.year, value.month, value.day);
+
+/// A repetição por dias do calendário só faz sentido com horários definidos:
+/// o intervalo em horas já governa a própria sequência a partir da âncora.
+void _validarRecorrencia(
+  TipoAgendamentoCadastro tipo,
+  RecorrenciaDias recorrencia,
+) {
+  if (tipo == TipoAgendamentoCadastro.intervalo &&
+      recorrencia is! RecorrenciaDiaria) {
+    throw const FormularioInvalido(
+      'A repetição por dias vale apenas para horários definidos.',
+    );
+  }
+}

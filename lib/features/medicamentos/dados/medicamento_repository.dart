@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/banco/app_database.dart';
 import '../../../core/banco/conversor_data_civil.dart';
 import '../../../core/data_hora/relogio.dart';
+import '../../tratamentos/dominio/recorrencia_persistida.dart';
 import '../dominio/cadastro_medicamento.dart';
 
 class MedicamentoResumo {
@@ -133,6 +134,7 @@ class MedicamentoRepository {
     final medicamentoId = _uuid.v4();
     final tratamentoId = _uuid.v4();
     final sortedHours = [...cadastro.horarios]..sort();
+    final recorrencia = RecorrenciaPersistida.colunas(cadastro.recorrencia);
 
     await _db.transaction(() async {
       await _db
@@ -178,6 +180,10 @@ class MedicamentoRepository {
               tipoAgendamento: cadastro.tipoAgendamento.name,
               dataHoraAncora: Value(cadastro.dataHoraAncora),
               intervaloMinutos: Value(cadastro.intervaloMinutos),
+              recorrencia: Value(recorrencia.tipo),
+              recorrenciaIntervalo: Value(recorrencia.intervalo),
+              recorrenciaDiasSemana: Value(recorrencia.diasSemana),
+              recorrenciaDiaDoMes: Value(recorrencia.diaDoMes),
               instrucoes: Value(_vazioParaNulo(cadastro.instrucoes)),
               criadoEm: now,
               atualizadoEm: now,
@@ -254,6 +260,7 @@ class MedicamentoRepository {
 
     final tratamentoId = _uuid.v4();
     final sortedHours = [...edicao.horarios]..sort();
+    final recorrencia = RecorrenciaPersistida.colunas(edicao.recorrencia);
     await _db.transaction(() async {
       await _db
           .into(_db.tratamentos)
@@ -278,6 +285,10 @@ class MedicamentoRepository {
               tipoAgendamento: edicao.tipoAgendamento.name,
               dataHoraAncora: Value(edicao.dataHoraAncora),
               intervaloMinutos: Value(edicao.intervaloMinutos),
+              recorrencia: Value(recorrencia.tipo),
+              recorrenciaIntervalo: Value(recorrencia.intervalo),
+              recorrenciaDiasSemana: Value(recorrencia.diasSemana),
+              recorrenciaDiaDoMes: Value(recorrencia.diaDoMes),
               instrucoes: Value(_vazioParaNulo(edicao.instrucoes)),
               criadoEm: now,
               atualizadoEm: now,
@@ -327,6 +338,7 @@ class MedicamentoRepository {
     }
     final novoId = _uuid.v4();
     final sortedHours = [...edicao.horarios]..sort();
+    final recorrencia = RecorrenciaPersistida.colunas(edicao.recorrencia);
     await _db.transaction(() async {
       await (_db.update(
         _db.tratamentos,
@@ -360,6 +372,10 @@ class MedicamentoRepository {
               tipoAgendamento: edicao.tipoAgendamento.name,
               dataHoraAncora: Value(edicao.dataHoraAncora),
               intervaloMinutos: Value(edicao.intervaloMinutos),
+              recorrencia: Value(recorrencia.tipo),
+              recorrenciaIntervalo: Value(recorrencia.intervalo),
+              recorrenciaDiasSemana: Value(recorrencia.diasSemana),
+              recorrenciaDiaDoMes: Value(recorrencia.diaDoMes),
               instrucoes: Value(_vazioParaNulo(edicao.instrucoes)),
               criadoEm: now,
               atualizadoEm: now,

@@ -160,7 +160,12 @@ final class PlanejadorNotificacoes {
       );
       final regra = tratamento.regra;
 
-      if (tratamento.usoContinuo && regra is RegraHorariosFixos) {
+      // A notificacao diaria repetida so vale quando a agenda ocorre todo
+      // dia. Recorrencias por dias, semanas ou meses caem nas ocorrencias
+      // individuais logo abaixo, senao o aviso tocaria em dias sem dose.
+      if (tratamento.usoContinuo &&
+          regra is RegraHorariosFixos &&
+          tratamento.recorrencia is RecorrenciaDiaria) {
         for (final horario in regra.horarios) {
           recorrencias.add(
             await _criarRecorrencia(
@@ -447,6 +452,10 @@ final class PlanejadorNotificacoes {
     }
   }
 
+  /// Maior salto possível entre duas ocorrências: uma recorrência anual mais
+  /// a folga de fevereiro. Serve como trava contra laço infinito.
+  static const int _maximoDiasSemOcorrencia = 400;
+
   static _FluxoOcorrencias? _criarFluxoHorario({
     required DateTime agora,
     required TratamentoAgenda tratamento,
@@ -460,22 +469,46 @@ final class PlanejadorNotificacoes {
       dia = DataHoraLocal.adicionarDiasCalendario(dia, 1);
       primeira = _combinar(dia, hora: horario.hora, minuto: horario.minuto);
     }
+    final primeiraValida = _ajustarParaDiaValido(tratamento, primeira);
+    if (primeiraValida == null) return null;
+
     final fim = tratamento.fimExclusivo;
-    if (fim != null && !primeira.isBefore(fim)) return null;
+    if (fim != null && !primeiraValida.isBefore(fim)) return null;
 
     return _FluxoOcorrencias(
       tratamentoId: tratamento.id,
       regraId: horario.id,
-      proxima: primeira,
+      proxima: primeiraValida,
       avancar: (atual) {
-        final proxima = _combinar(
+        final seguinte = _combinar(
           DataHoraLocal.adicionarDiasCalendario(atual, 1),
           hora: horario.hora,
           minuto: horario.minuto,
         );
+        final proxima = _ajustarParaDiaValido(tratamento, seguinte);
+        if (proxima == null) return null;
         return fim == null || proxima.isBefore(fim) ? proxima : null;
       },
     );
+  }
+
+  /// Avança até o próximo dia que a recorrência aceita.
+  ///
+  /// Sem isso, uma dose semanal ou mensal faria o planejador percorrer dia a
+  /// dia — e cada dia custa uma consulta de agenda ao banco.
+  static DateTime? _ajustarParaDiaValido(
+    TratamentoAgenda tratamento,
+    DateTime candidata,
+  ) {
+    final recorrencia = tratamento.recorrencia;
+    if (recorrencia is RecorrenciaDiaria) return candidata;
+
+    var atual = candidata;
+    for (var passo = 0; passo < _maximoDiasSemOcorrencia; passo++) {
+      if (recorrencia.incluiDia(atual, tratamento.dataInicio)) return atual;
+      atual = DataHoraLocal.adicionarDiasCalendario(atual, 1);
+    }
+    return null;
   }
 
   static _FluxoOcorrencias? _criarFluxoIntervalo({

@@ -247,4 +247,44 @@ void main() {
     expect(movimentos.single.tipo, 'entradaReposicao');
     expect(movimentos.single.quantidade, 10);
   });
+
+  testWidgetsComBanco('cadastro grava repetição em dias da semana', (
+    tester,
+    db,
+  ) async {
+    await montarAplicativo(tester, db: db, agora: agora);
+
+    await tester.tap(find.text('Cadastrar medicamento'));
+    await bombearInterface(tester);
+    await tester.enterText(
+      find.byKey(const Key('campo_nome_medicamento')),
+      'Vitamina D',
+    );
+    tester.testTextInput.hide();
+
+    await selecionarEtapaStepper(tester, 2);
+    final seletor = find.byKey(const Key('campo_recorrencia'));
+    expect(seletor, findsOneWidget);
+    await tester.tap(seletor);
+    await bombearInterface(tester);
+    await tester.tap(find.text('Em dias da semana').last);
+    await bombearInterface(tester);
+
+    // O primeiro chip "Q" é quarta-feira; segunda já vem marcada.
+    await tester.tap(find.widgetWithText(FilterChip, 'Q').first);
+    await bombearInterface(tester);
+
+    await selecionarEtapaStepper(tester, 5);
+    expect(find.textContaining('Repete:'), findsOneWidget);
+    await tocarBotaoPreenchido(tester, 'Salvar');
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await bombearInterface(tester);
+
+    final tratamento = await db.select(db.tratamentos).getSingle();
+    expect(tratamento.recorrencia, 'diasDaSemana');
+    expect(tratamento.recorrenciaDiasSemana, '1,3');
+    expect(tratamento.recorrenciaIntervalo, 1);
+  });
 }

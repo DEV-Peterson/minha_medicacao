@@ -54,6 +54,10 @@ final class GeradorAgenda {
     var data = DataHoraLocal.inicioDoDia(inicio);
 
     while (data.isBefore(fimExclusivo)) {
+      if (!tratamento.recorrencia.incluiDia(data, tratamento.dataInicio)) {
+        data = DataHoraLocal.adicionarDiasCalendario(data, 1);
+        continue;
+      }
       for (final horario in regra.horarios) {
         final programada = DataHoraLocal.combinar(
           data,

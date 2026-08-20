@@ -20,6 +20,8 @@ cadastrar fica guardado apenas no seu celular.
 - Guarda o histórico das doses tomadas e das não tomadas.
 - Serve para remédio de uso contínuo e para tratamento com data para acabar.
 - Aceita horários fixos (08:00 e 20:00) ou intervalos (a cada 8 horas).
+- Repete todos os dias, em dias alternados, em dias da semana escolhidos
+  ou uma vez por mês — para remédio semanal, injeção mensal e afins.
 - Guarda foto do medicamento e da receita, se você quiser.
 
 ## Baixar e instalar

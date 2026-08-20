@@ -1,0 +1,1713 @@
+{
+  "_meta": {
+    "description": "This file contains a serialized version of schema entities for drift.",
+    "version": "1.3.0"
+  },
+  "options": {
+    "store_date_time_values_as_text": false
+  },
+  "entities": [
+    {
+      "id": 0,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "medicamentos",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "nome",
+            "getter_name": "nome",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "allowed-lengths": {
+                  "min": 1,
+                  "max": 200
+                }
+              }
+            ]
+          },
+          {
+            "name": "concentracao",
+            "getter_name": "concentracao",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "forma_farmaceutica",
+            "getter_name": "formaFarmaceutica",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "unidade_dose_padrao",
+            "getter_name": "unidadeDosePadrao",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "unidade_estoque",
+            "getter_name": "unidadeEstoque",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "observacoes",
+            "getter_name": "observacoes",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "controle_estoque",
+            "getter_name": "controleEstoque",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"controle_estoque\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"controle_estoque\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "ativo",
+            "getter_name": "ativo",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"ativo\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"ativo\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "criado_em",
+            "getter_name": "criadoEm",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "atualizado_em",
+            "getter_name": "atualizadoEm",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "id"
+        ]
+      }
+    },
+    {
+      "id": 1,
+      "references": [
+        0
+      ],
+      "type": "table",
+      "data": {
+        "name": "tratamentos",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "medicamento_id",
+            "getter_name": "medicamentoId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "medicamentos",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": "cascade",
+                  "on_delete": "restrict"
+                }
+              }
+            ]
+          },
+          {
+            "name": "quantidade_dose",
+            "getter_name": "quantidadeDose",
+            "moor_type": "double",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "('quantidade_dose > 0')"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "unidade_dose",
+            "getter_name": "unidadeDose",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "allowed-lengths": {
+                  "min": 1,
+                  "max": 80
+                }
+              }
+            ]
+          },
+          {
+            "name": "consumo_estoque_por_dose",
+            "getter_name": "consumoEstoquePorDose",
+            "moor_type": "double",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "('consumo_estoque_por_dose IS NULL OR consumo_estoque_por_dose > 0')"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "data_inicio",
+            "getter_name": "dataInicio",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const ConversorDataCivil()",
+              "dart_type_name": "DateTime"
+            }
+          },
+          {
+            "name": "data_fim",
+            "getter_name": "dataFim",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [],
+            "type_converter": {
+              "dart_expr": "const ConversorDataCivil()",
+              "dart_type_name": "DateTime"
+            }
+          },
+          {
+            "name": "uso_continuo",
+            "getter_name": "usoContinuo",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"uso_continuo\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"uso_continuo\" IN (0, 1))"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "tipo_agendamento",
+            "getter_name": "tipoAgendamento",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "allowed-lengths": {
+                  "min": 1,
+                  "max": 30
+                }
+              }
+            ]
+          },
+          {
+            "name": "data_hora_ancora",
+            "getter_name": "dataHoraAncora",
+            "moor_type": "dateTime",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "intervalo_minutos",
+            "getter_name": "intervaloMinutos",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "('intervalo_minutos IS NULL OR intervalo_minutos > 0')"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "recorrencia",
+            "getter_name": "recorrencia",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": "const CustomExpression('\\'diaria\\'')",
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "allowed-lengths": {
+                  "min": 1,
+                  "max": 20
+                }
+              }
+            ]
+          },
+          {
+            "name": "recorrencia_intervalo",
+            "getter_name": "recorrenciaIntervalo",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "('recorrencia_intervalo IS NULL OR recorrencia_intervalo > 0')"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "recorrencia_dias_semana",
+            "getter_name": "recorrenciaDiasSemana",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "allowed-lengths": {
+                  "min": 1,
+                  "max": 20
+                }
+              }
+            ]
+          },
+          {
+            "name": "recorrencia_dia_do_mes",
+            "getter_name": "recorrenciaDiaDoMes",
+            "moor_type": "int",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "('recorrencia_dia_do_mes IS NULL OR ' '(recorrencia_dia_do_mes >= 1 AND recorrencia_dia_do_mes <= 31)')"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "instrucoes",
+            "getter_name": "instrucoes",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "ativo",
+            "getter_name": "ativo",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"ativo\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"ativo\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('1')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "encerrado_em",
+            "getter_name": "encerradoEm",
+            "moor_type": "dateTime",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "criado_em",
+            "getter_name": "criadoEm",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "atualizado_em",
+            "getter_name": "atualizadoEm",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [
+          "CHECK ((uso_continuo = 1) OR (data_fim IS NOT NULL))",
+          "CHECK (data_fim IS NULL OR data_fim >= data_inicio)",
+          "CHECK (tipo_agendamento IN ('horariosFixos', 'intervalo'))",
+          "CHECK ((tipo_agendamento = 'intervalo' AND data_hora_ancora IS NOT NULL AND intervalo_minutos IS NOT NULL) OR tipo_agendamento = 'horariosFixos')",
+          "CHECK (recorrencia IN ('diaria', 'cadaNDias', 'diasDaSemana', 'mensal'))",
+          "CHECK (recorrencia = 'diaria' OR tipo_agendamento = 'horariosFixos')",
+          "CHECK (recorrencia <> 'cadaNDias' OR recorrencia_intervalo IS NOT NULL)",
+          "CHECK (recorrencia <> 'diasDaSemana' OR recorrencia_dias_semana IS NOT NULL)",
+          "CHECK (recorrencia <> 'mensal' OR recorrencia_dia_do_mes IS NOT NULL)"
+        ],
+        "explicit_pk": [
+          "id"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "references": [
+        1
+      ],
+      "type": "table",
+      "data": {
+        "name": "horarios_tratamento",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "tratamento_id",
+            "getter_name": "tratamentoId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "REFERENCES tratamentos (id) ON UPDATE CASCADE ON DELETE CASCADE",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES tratamentos (id) ON UPDATE CASCADE ON DELETE CASCADE"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "tratamentos",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": "cascade",
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "hora",
+            "getter_name": "hora",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "('hora BETWEEN 0 AND 23')"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "minuto",
+            "getter_name": "minuto",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "('minuto BETWEEN 0 AND 59')"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "ordem",
+            "getter_name": "ordem",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "('ordem >= 0')"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "id"
+        ],
+        "unique_keys": [
+          [
+            "tratamento_id",
+            "hora",
+            "minuto"
+          ]
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "references": [
+        1,
+        0
+      ],
+      "type": "table",
+      "data": {
+        "name": "registros_dose",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "dose_key",
+            "getter_name": "doseKey",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "UNIQUE",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "UNIQUE"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "unique"
+            ]
+          },
+          {
+            "name": "tratamento_id",
+            "getter_name": "tratamentoId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "REFERENCES tratamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES tratamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "tratamentos",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": "cascade",
+                  "on_delete": "restrict"
+                }
+              }
+            ]
+          },
+          {
+            "name": "medicamento_id",
+            "getter_name": "medicamentoId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "medicamentos",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": "cascade",
+                  "on_delete": "restrict"
+                }
+              }
+            ]
+          },
+          {
+            "name": "data_hora_programada",
+            "getter_name": "dataHoraProgramada",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "data_hora_acao",
+            "getter_name": "dataHoraAcao",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "quantidade_dose",
+            "getter_name": "quantidadeDose",
+            "moor_type": "double",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "('quantidade_dose > 0')"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "unidade_dose",
+            "getter_name": "unidadeDose",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "allowed-lengths": {
+                  "min": 1,
+                  "max": 80
+                }
+              }
+            ]
+          },
+          {
+            "name": "status",
+            "getter_name": "status",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(\"status IN ('tomada', 'naoTomada')\")"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "observacao",
+            "getter_name": "observacao",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "criado_em",
+            "getter_name": "criadoEm",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "atualizado_em",
+            "getter_name": "atualizadoEm",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "id"
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "references": [
+        0,
+        3
+      ],
+      "type": "table",
+      "data": {
+        "name": "movimentacoes_estoque",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "medicamento_id",
+            "getter_name": "medicamentoId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "medicamentos",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": "cascade",
+                  "on_delete": "restrict"
+                }
+              }
+            ]
+          },
+          {
+            "name": "registro_dose_id",
+            "getter_name": "registroDoseId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "defaultConstraints": "REFERENCES registros_dose (id) ON UPDATE CASCADE ON DELETE RESTRICT",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES registros_dose (id) ON UPDATE CASCADE ON DELETE RESTRICT"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "registros_dose",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": "cascade",
+                  "on_delete": "restrict"
+                }
+              }
+            ]
+          },
+          {
+            "name": "movimentacao_origem_id",
+            "getter_name": "movimentacaoOrigemId",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "tipo",
+            "getter_name": "tipo",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(\"tipo IN ('entradaReposicao', 'saidaDose', \" \"'ajusteEntrada', 'ajusteSaida')\")"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "quantidade",
+            "getter_name": "quantidade",
+            "moor_type": "double",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "('quantidade > 0')"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "unidade",
+            "getter_name": "unidade",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "allowed-lengths": {
+                  "min": 1,
+                  "max": 80
+                }
+              }
+            ]
+          },
+          {
+            "name": "data_hora",
+            "getter_name": "dataHora",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "observacao",
+            "getter_name": "observacao",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "id"
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "references": [
+        0
+      ],
+      "type": "table",
+      "data": {
+        "name": "anexos",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "medicamento_id",
+            "getter_name": "medicamentoId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE CASCADE",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE CASCADE"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "medicamentos",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": "cascade",
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "tipo",
+            "getter_name": "tipo",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "check": {
+                  "dart_expression": {
+                    "elements": [
+                      "const ",
+                      {
+                        "lexeme": "CustomExpression",
+                        "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+                      },
+                      "(\"tipo IN ('fotoMedicamento', 'receita')\")"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "name": "caminho_relativo",
+            "getter_name": "caminhoRelativo",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "nome_original",
+            "getter_name": "nomeOriginal",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "criado_em",
+            "getter_name": "criadoEm",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "id"
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "references": [],
+      "type": "table",
+      "data": {
+        "name": "configuracoes",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "chave",
+            "getter_name": "chave",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "valor",
+            "getter_name": "valor",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "atualizado_em",
+            "getter_name": "atualizadoEm",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "chave"
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "references": [
+        1,
+        0
+      ],
+      "type": "table",
+      "data": {
+        "name": "adiamentos_dose",
+        "was_declared_in_moor": false,
+        "columns": [
+          {
+            "name": "id",
+            "getter_name": "id",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "dose_key",
+            "getter_name": "doseKey",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "UNIQUE",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "UNIQUE"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              "unique"
+            ]
+          },
+          {
+            "name": "tratamento_id",
+            "getter_name": "tratamentoId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "REFERENCES tratamentos (id) ON UPDATE CASCADE ON DELETE CASCADE",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES tratamentos (id) ON UPDATE CASCADE ON DELETE CASCADE"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "tratamentos",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": "cascade",
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "medicamento_id",
+            "getter_name": "medicamentoId",
+            "moor_type": "string",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE CASCADE",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE CASCADE"
+            },
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": [
+              {
+                "foreign_key": {
+                  "to": {
+                    "table": "medicamentos",
+                    "column": "id"
+                  },
+                  "initially_deferred": false,
+                  "on_update": "cascade",
+                  "on_delete": "cascade"
+                }
+              }
+            ]
+          },
+          {
+            "name": "data_hora_programada",
+            "getter_name": "dataHoraProgramada",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "lembrar_em",
+            "getter_name": "lembrarEm",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "notificacao_id",
+            "getter_name": "notificacaoId",
+            "moor_type": "int",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "criado_em",
+            "getter_name": "criadoEm",
+            "moor_type": "dateTime",
+            "nullable": false,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
+          }
+        ],
+        "is_virtual": false,
+        "without_rowid": false,
+        "constraints": [],
+        "explicit_pk": [
+          "id"
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "references": [
+        0
+      ],
+      "type": "index",
+      "data": {
+        "on": 0,
+        "name": "idx_medicamentos_nome",
+        "sql": null,
+        "unique": false,
+        "columns": [
+          {
+            "column": "nome",
+            "order_by": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "references": [
+        1
+      ],
+      "type": "index",
+      "data": {
+        "on": 1,
+        "name": "idx_tratamentos_medicamento",
+        "sql": null,
+        "unique": false,
+        "columns": [
+          {
+            "column": "medicamento_id",
+            "order_by": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "references": [
+        1
+      ],
+      "type": "index",
+      "data": {
+        "on": 1,
+        "name": "idx_tratamentos_ativos",
+        "sql": null,
+        "unique": false,
+        "columns": [
+          {
+            "column": "ativo",
+            "order_by": null
+          },
+          {
+            "column": "data_inicio",
+            "order_by": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "references": [
+        2
+      ],
+      "type": "index",
+      "data": {
+        "on": 2,
+        "name": "idx_horarios_tratamento_ordem",
+        "sql": null,
+        "unique": false,
+        "columns": [
+          {
+            "column": "tratamento_id",
+            "order_by": null
+          },
+          {
+            "column": "ordem",
+            "order_by": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "references": [
+        3
+      ],
+      "type": "index",
+      "data": {
+        "on": 3,
+        "name": "idx_registros_dose_programada",
+        "sql": null,
+        "unique": false,
+        "columns": [
+          {
+            "column": "data_hora_programada",
+            "order_by": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "references": [
+        3
+      ],
+      "type": "index",
+      "data": {
+        "on": 3,
+        "name": "idx_registros_dose_medicamento",
+        "sql": null,
+        "unique": false,
+        "columns": [
+          {
+            "column": "medicamento_id",
+            "order_by": null
+          },
+          {
+            "column": "data_hora_programada",
+            "order_by": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 14,
+      "references": [
+        4
+      ],
+      "type": "index",
+      "data": {
+        "on": 4,
+        "name": "idx_movimentacoes_medicamento_data",
+        "sql": null,
+        "unique": false,
+        "columns": [
+          {
+            "column": "medicamento_id",
+            "order_by": null
+          },
+          {
+            "column": "data_hora",
+            "order_by": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "references": [
+        4
+      ],
+      "type": "index",
+      "data": {
+        "on": 4,
+        "name": "idx_movimentacoes_registro_dose",
+        "sql": null,
+        "unique": false,
+        "columns": [
+          {
+            "column": "registro_dose_id",
+            "order_by": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 16,
+      "references": [
+        5
+      ],
+      "type": "index",
+      "data": {
+        "on": 5,
+        "name": "idx_anexos_medicamento",
+        "sql": null,
+        "unique": false,
+        "columns": [
+          {
+            "column": "medicamento_id",
+            "order_by": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 17,
+      "references": [
+        7
+      ],
+      "type": "index",
+      "data": {
+        "on": 7,
+        "name": "idx_adiamentos_lembrete",
+        "sql": null,
+        "unique": false,
+        "columns": [
+          {
+            "column": "lembrar_em",
+            "order_by": null
+          }
+        ]
+      }
+    }
+  ],
+  "fixed_sql": [
+    {
+      "name": "medicamentos",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"medicamentos\" (\"id\" TEXT NOT NULL, \"nome\" TEXT NOT NULL, \"concentracao\" TEXT NULL, \"forma_farmaceutica\" TEXT NULL, \"unidade_dose_padrao\" TEXT NULL, \"unidade_estoque\" TEXT NULL, \"observacoes\" TEXT NULL, \"controle_estoque\" INTEGER NOT NULL DEFAULT 0 CHECK (\"controle_estoque\" IN (0, 1)), \"ativo\" INTEGER NOT NULL DEFAULT 1 CHECK (\"ativo\" IN (0, 1)), \"criado_em\" INTEGER NOT NULL, \"atualizado_em\" INTEGER NOT NULL, PRIMARY KEY (\"id\"));"
+        }
+      ]
+    },
+    {
+      "name": "tratamentos",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"tratamentos\" (\"id\" TEXT NOT NULL, \"medicamento_id\" TEXT NOT NULL REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT, \"quantidade_dose\" REAL NOT NULL CHECK(quantidade_dose > 0), \"unidade_dose\" TEXT NOT NULL, \"consumo_estoque_por_dose\" REAL NULL CHECK(consumo_estoque_por_dose IS NULL OR consumo_estoque_por_dose > 0), \"data_inicio\" INTEGER NOT NULL, \"data_fim\" INTEGER NULL, \"uso_continuo\" INTEGER NOT NULL CHECK (\"uso_continuo\" IN (0, 1)), \"tipo_agendamento\" TEXT NOT NULL, \"data_hora_ancora\" INTEGER NULL, \"intervalo_minutos\" INTEGER NULL CHECK(intervalo_minutos IS NULL OR intervalo_minutos > 0), \"recorrencia\" TEXT NOT NULL DEFAULT 'diaria', \"recorrencia_intervalo\" INTEGER NULL CHECK(recorrencia_intervalo IS NULL OR recorrencia_intervalo > 0), \"recorrencia_dias_semana\" TEXT NULL, \"recorrencia_dia_do_mes\" INTEGER NULL CHECK(recorrencia_dia_do_mes IS NULL OR (recorrencia_dia_do_mes >= 1 AND recorrencia_dia_do_mes <= 31)), \"instrucoes\" TEXT NULL, \"ativo\" INTEGER NOT NULL DEFAULT 1 CHECK (\"ativo\" IN (0, 1)), \"encerrado_em\" INTEGER NULL, \"criado_em\" INTEGER NOT NULL, \"atualizado_em\" INTEGER NOT NULL, PRIMARY KEY (\"id\"), CHECK ((uso_continuo = 1) OR (data_fim IS NOT NULL)), CHECK (data_fim IS NULL OR data_fim >= data_inicio), CHECK (tipo_agendamento IN ('horariosFixos', 'intervalo')), CHECK ((tipo_agendamento = 'intervalo' AND data_hora_ancora IS NOT NULL AND intervalo_minutos IS NOT NULL) OR tipo_agendamento = 'horariosFixos'), CHECK (recorrencia IN ('diaria', 'cadaNDias', 'diasDaSemana', 'mensal')), CHECK (recorrencia = 'diaria' OR tipo_agendamento = 'horariosFixos'), CHECK (recorrencia <> 'cadaNDias' OR recorrencia_intervalo IS NOT NULL), CHECK (recorrencia <> 'diasDaSemana' OR recorrencia_dias_semana IS NOT NULL), CHECK (recorrencia <> 'mensal' OR recorrencia_dia_do_mes IS NOT NULL));"
+        }
+      ]
+    },
+    {
+      "name": "horarios_tratamento",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"horarios_tratamento\" (\"id\" TEXT NOT NULL, \"tratamento_id\" TEXT NOT NULL REFERENCES tratamentos (id) ON UPDATE CASCADE ON DELETE CASCADE, \"hora\" INTEGER NOT NULL CHECK(hora BETWEEN 0 AND 23), \"minuto\" INTEGER NOT NULL CHECK(minuto BETWEEN 0 AND 59), \"ordem\" INTEGER NOT NULL CHECK(ordem >= 0), PRIMARY KEY (\"id\"), UNIQUE (\"tratamento_id\", \"hora\", \"minuto\"));"
+        }
+      ]
+    },
+    {
+      "name": "registros_dose",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"registros_dose\" (\"id\" TEXT NOT NULL, \"dose_key\" TEXT NOT NULL UNIQUE, \"tratamento_id\" TEXT NOT NULL REFERENCES tratamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT, \"medicamento_id\" TEXT NOT NULL REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT, \"data_hora_programada\" INTEGER NOT NULL, \"data_hora_acao\" INTEGER NOT NULL, \"quantidade_dose\" REAL NOT NULL CHECK(quantidade_dose > 0), \"unidade_dose\" TEXT NOT NULL, \"status\" TEXT NOT NULL CHECK(status IN ('tomada', 'naoTomada')), \"observacao\" TEXT NULL, \"criado_em\" INTEGER NOT NULL, \"atualizado_em\" INTEGER NOT NULL, PRIMARY KEY (\"id\"));"
+        }
+      ]
+    },
+    {
+      "name": "movimentacoes_estoque",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"movimentacoes_estoque\" (\"id\" TEXT NOT NULL, \"medicamento_id\" TEXT NOT NULL REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE RESTRICT, \"registro_dose_id\" TEXT NULL REFERENCES registros_dose (id) ON UPDATE CASCADE ON DELETE RESTRICT, \"movimentacao_origem_id\" TEXT NULL, \"tipo\" TEXT NOT NULL CHECK(tipo IN ('entradaReposicao', 'saidaDose', 'ajusteEntrada', 'ajusteSaida')), \"quantidade\" REAL NOT NULL CHECK(quantidade > 0), \"unidade\" TEXT NOT NULL, \"data_hora\" INTEGER NOT NULL, \"observacao\" TEXT NULL, PRIMARY KEY (\"id\"));"
+        }
+      ]
+    },
+    {
+      "name": "anexos",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"anexos\" (\"id\" TEXT NOT NULL, \"medicamento_id\" TEXT NOT NULL REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE CASCADE, \"tipo\" TEXT NOT NULL CHECK(tipo IN ('fotoMedicamento', 'receita')), \"caminho_relativo\" TEXT NOT NULL, \"nome_original\" TEXT NULL, \"criado_em\" INTEGER NOT NULL, PRIMARY KEY (\"id\"));"
+        }
+      ]
+    },
+    {
+      "name": "configuracoes",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"configuracoes\" (\"chave\" TEXT NOT NULL, \"valor\" TEXT NOT NULL, \"atualizado_em\" INTEGER NOT NULL, PRIMARY KEY (\"chave\"));"
+        }
+      ]
+    },
+    {
+      "name": "adiamentos_dose",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE TABLE IF NOT EXISTS \"adiamentos_dose\" (\"id\" TEXT NOT NULL, \"dose_key\" TEXT NOT NULL UNIQUE, \"tratamento_id\" TEXT NOT NULL REFERENCES tratamentos (id) ON UPDATE CASCADE ON DELETE CASCADE, \"medicamento_id\" TEXT NOT NULL REFERENCES medicamentos (id) ON UPDATE CASCADE ON DELETE CASCADE, \"data_hora_programada\" INTEGER NOT NULL, \"lembrar_em\" INTEGER NOT NULL, \"notificacao_id\" INTEGER NOT NULL, \"criado_em\" INTEGER NOT NULL, PRIMARY KEY (\"id\"));"
+        }
+      ]
+    },
+    {
+      "name": "idx_medicamentos_nome",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_medicamentos_nome ON medicamentos (nome)"
+        }
+      ]
+    },
+    {
+      "name": "idx_tratamentos_medicamento",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_tratamentos_medicamento ON tratamentos (medicamento_id)"
+        }
+      ]
+    },
+    {
+      "name": "idx_tratamentos_ativos",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_tratamentos_ativos ON tratamentos (ativo, data_inicio)"
+        }
+      ]
+    },
+    {
+      "name": "idx_horarios_tratamento_ordem",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_horarios_tratamento_ordem ON horarios_tratamento (tratamento_id, ordem)"
+        }
+      ]
+    },
+    {
+      "name": "idx_registros_dose_programada",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_registros_dose_programada ON registros_dose (data_hora_programada)"
+        }
+      ]
+    },
+    {
+      "name": "idx_registros_dose_medicamento",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_registros_dose_medicamento ON registros_dose (medicamento_id, data_hora_programada)"
+        }
+      ]
+    },
+    {
+      "name": "idx_movimentacoes_medicamento_data",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_movimentacoes_medicamento_data ON movimentacoes_estoque (medicamento_id, data_hora)"
+        }
+      ]
+    },
+    {
+      "name": "idx_movimentacoes_registro_dose",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_movimentacoes_registro_dose ON movimentacoes_estoque (registro_dose_id)"
+        }
+      ]
+    },
+    {
+      "name": "idx_anexos_medicamento",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_anexos_medicamento ON anexos (medicamento_id)"
+        }
+      ]
+    },
+    {
+      "name": "idx_adiamentos_lembrete",
+      "sql": [
+        {
+          "dialect": "sqlite",
+          "sql": "CREATE INDEX idx_adiamentos_lembrete ON adiamentos_dose (lembrar_em)"
+        }
+      ]
+    }
+  ]
+}

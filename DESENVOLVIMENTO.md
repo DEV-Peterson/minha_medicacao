@@ -44,14 +44,25 @@ instalar o primeiro APK que conterá dados reais.
    ```
 
 Os schemas versionados ficam em `drift_schemas/app_database/`. A versão 2
-introduz datas civis estáveis para início/fim de tratamentos e inclui migração
-sem perda da versão 1. Ao mudar o schema, incremente `schemaVersion`, escreva
-uma migration e execute:
+introduz datas civis estáveis para início/fim de tratamentos; a versão 3
+acrescenta a recorrência por dias do calendário. Ambas migram sem perda.
+
+Ao mudar o schema, incremente `versaoSchemaBancoAtual`, escreva a migration e
+gere os artefatos. Como `schemaVersion` é lido de uma constante, o
+`make-migrations` não consegue inferir a versão sozinho; passe o arquivo:
 
 ```powershell
-dart run drift_dev make-migrations
-dart run build_runner build
+dart run build_runner build --delete-conflicting-outputs
+dart run drift_dev schema dump lib/core/banco/app_database.dart drift_schemas/app_database/drift_schema_vN.json
+dart run drift_dev schema generate drift_schemas/app_database/ test/drift/app_database/generated/
 ```
+
+Migrations que só acrescentam colunas usam `addColumn`. Quando a mudança
+inclui constraint de tabela — que o SQLite não aceita via `ALTER TABLE` — a
+tabela é reconstruída com `TableMigration`, com as chaves estrangeiras
+desligadas durante a operação e um `PRAGMA foreign_key_check` antes de
+religá-las. Sem isso, um banco migrado ficaria com schema diferente de um
+banco recém-criado, e o teste de migração acusa a divergência.
 
 Nunca resolva uma atualização apagando ou recriando o banco da usuária.
 
@@ -92,6 +103,38 @@ notificação e fluxos essenciais de widgets.
   inativa um medicamento. Um medicamento inativado pode ser **reativado**; os
   tratamentos encerrados continuam encerrados, então inicie um novo tratamento
   para voltar a gerar doses.
+
+## Regras de agenda
+
+Um tratamento tem um tipo de agendamento e, quando ele usa horários definidos,
+uma recorrência de dias:
+
+| Tipo | Campos | Uso |
+| --- | --- | --- |
+| `horariosFixos` | horários em `horarios_tratamento` | 08:00 e 20:00 |
+| `intervalo` | âncora + `intervalo_minutos` | a cada 8 horas |
+
+| Recorrência | Colunas | Exemplo |
+| --- | --- | --- |
+| `diaria` | — | todo dia |
+| `cadaNDias` | `recorrencia_intervalo` | dia sim, dia não |
+| `diasDaSemana` | `recorrencia_dias_semana`, `recorrencia_intervalo` | seg e qui, a cada 2 semanas |
+| `mensal` | `recorrencia_dia_do_mes`, `recorrencia_intervalo` | todo dia 5, a cada 3 meses |
+
+A contagem é sempre por data civil, nunca por duração: somar 48 horas
+deslocaria o horário prescrito se o fuso mudasse. No modo mensal, um dia que
+não existe no mês cai no último dia — dia 31 vira 28, 29 ou 30.
+
+Recorrência não diária é incompatível com `intervalo`, e o domínio recusa a
+combinação: o intervalo em horas já governa a própria sequência a partir da
+âncora.
+
+Isso tem uma consequência no agendamento de lembretes. Um tratamento contínuo
+com horários fixos e recorrência diária vira uma notificação repetida todo dia,
+gastando um alarme por horário. Qualquer outra recorrência usa ocorrências
+individuais, porque a repetição diária tocaria em dias sem dose. Para que o
+planejador não percorra o calendário dia a dia procurando a próxima dose de um
+remédio mensal, ele salta direto para o próximo dia aceito pela recorrência.
 
 ## Compatibilidade e layout
 

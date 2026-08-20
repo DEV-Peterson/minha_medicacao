@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/layout.dart';
 import '../../../app/providers.dart';
 import '../../../core/util/formatadores.dart';
+import '../../tratamentos/dominio/modelos_agenda.dart';
 import '../dominio/cadastro_medicamento.dart';
+import 'seletor_recorrencia.dart';
 
 class FormularioMedicamento extends ConsumerStatefulWidget {
   const FormularioMedicamento({super.key});
@@ -38,6 +40,7 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
   final _horarios = <TimeOfDay>[const TimeOfDay(hour: 8, minute: 0)];
   late DateTime _ancora;
   var _controlarEstoque = false;
+  RecorrenciaDias _recorrencia = const RecorrenciaDiaria();
   var _saving = false;
 
   static const _formas = [
@@ -377,6 +380,11 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
             icon: const Icon(Icons.add),
             label: const Text('Adicionar horário'),
           ),
+          const SizedBox(height: 20),
+          SeletorRecorrencia(
+            valor: _recorrencia,
+            aoAlterar: (valor) => setState(() => _recorrencia = valor),
+          ),
         ] else ...[
           TextFormField(
             controller: _intervaloHoras,
@@ -496,6 +504,9 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
     final unit = _unidadeDose == 'outro'
         ? _unidadeOutro.text.trim()
         : _unidadeDose;
+    final recorrencia = _tipo == TipoAgendamentoCadastro.horariosFixos
+        ? descreverRecorrencia(_recorrencia)
+        : null;
     final times = _tipo == TipoAgendamentoCadastro.horariosFixos
         ? ([
             ..._horarios,
@@ -514,6 +525,7 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
             const SizedBox(height: 8),
             Text('${_quantidadeDose.text} $unit'),
             Text(times),
+            if (recorrencia != null) Text('Repete: $recorrencia'),
             Text(
               _continuo
                   ? 'Uso contínuo'
@@ -564,6 +576,9 @@ class _FormularioMedicamentoState extends ConsumerState<FormularioMedicamento> {
       controlarEstoque: _controlarEstoque,
       unidadeEstoque: _unidadeEstoque.text,
       estoqueInicial: lerDecimal(_estoqueInicial.text),
+      recorrencia: _tipo == TipoAgendamentoCadastro.horariosFixos
+          ? _recorrencia
+          : const RecorrenciaDiaria(),
       consumoEstoquePorDose: lerDecimal(_consumoEstoque.text),
     );
     try {

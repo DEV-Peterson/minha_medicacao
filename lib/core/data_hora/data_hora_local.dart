@@ -46,6 +46,25 @@ abstract final class DataHoraLocal {
     return DateTime(local.year, local.month, local.day, hora, minuto);
   }
 
+  /// Diferença em dias de calendário, ignorando hora, minuto e fuso.
+  ///
+  /// Subtrair `DateTime` devolveria duração absoluta, que erra em regiões com
+  /// horário de verão; aqui a contagem é sempre civil.
+  static int diferencaEmDias(DateTime de, DateTime ate) {
+    final inicio = inicioDoDia(de);
+    final fim = inicioDoDia(ate);
+    return (fim.difference(inicio).inHours / 24).round();
+  }
+
+  static int ultimoDiaDoMes(int ano, int mes) => DateTime(ano, mes + 1, 0).day;
+
+  /// Diferença em meses de calendário entre duas datas.
+  static int diferencaEmMeses(DateTime de, DateTime ate) {
+    final inicio = _comoLocal(de);
+    final fim = _comoLocal(ate);
+    return (fim.year - inicio.year) * 12 + (fim.month - inicio.month);
+  }
+
   static bool mesmaData(DateTime primeiro, DateTime segundo) {
     final primeiroLocal = _comoLocal(primeiro);
     final segundoLocal = _comoLocal(segundo);

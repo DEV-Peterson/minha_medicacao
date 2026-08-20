@@ -52,6 +52,85 @@ void main() {
 
   tearDown(() => db.close());
 
+  group('recorrencia por dias do calendario', () {
+    Future<void> definirRecorrencia({
+      required String tipo,
+      int? intervalo,
+      String? diasSemana,
+      int? diaDoMes,
+    }) async {
+      await (db.update(
+        db.tratamentos,
+      )..where((tabela) => tabela.id.equals('tratamento-1'))).write(
+        TratamentosCompanion(
+          recorrencia: Value(tipo),
+          recorrenciaIntervalo: Value(intervalo),
+          recorrenciaDiasSemana: Value(diasSemana),
+          recorrenciaDiaDoMes: Value(diaDoMes),
+        ),
+      );
+    }
+
+    test('a cada dois dias nao usa notificacao diaria repetida', () async {
+      await definirRecorrencia(tipo: 'cadaNDias', intervalo: 2);
+      final planejador = PlanejadorNotificacoes(agendaRepository);
+
+      final resultado = await planejador.planejar(
+        agora: DateTime(2026, 8, 18, 7),
+      );
+
+      expect(resultado.any((item) => item.recorrenciaDiaria), isFalse);
+      // O tratamento comeca em 18/08, entao valem 18, 20, 22 e nunca 19.
+      // O tratamento tem dois horarios por dia valido: 08:00 e 20:00.
+      expect(resultado.take(4).map((item) => item.dataHoraLocal), [
+        DateTime(2026, 8, 18, 8),
+        DateTime(2026, 8, 18, 20),
+        DateTime(2026, 8, 20, 8),
+        DateTime(2026, 8, 20, 20),
+      ]);
+      final agosto = resultado
+          .map((item) => item.dataHoraLocal)
+          .where((data) => data.year == 2026 && data.month == DateTime.august)
+          .map((data) => data.day)
+          .toSet();
+      expect(agosto, {18, 20, 22, 24, 26, 28, 30});
+    });
+
+    test('dose mensal agenda o proximo mes sem varrer dia a dia', () async {
+      await definirRecorrencia(tipo: 'mensal', intervalo: 1, diaDoMes: 20);
+      final planejador = PlanejadorNotificacoes(agendaRepository);
+
+      final resultado = await planejador.planejar(
+        agora: DateTime(2026, 8, 18, 7),
+      );
+
+      expect(resultado, isNotEmpty);
+      expect(resultado.any((item) => item.recorrenciaDiaria), isFalse);
+      expect(resultado.first.dataHoraLocal, DateTime(2026, 8, 20, 8));
+      expect(resultado.map((item) => item.dataHoraLocal.day).toSet(), {20});
+    });
+
+    test('dias da semana agenda apenas os dias escolhidos', () async {
+      // 1 e segunda-feira, 4 e quinta-feira.
+      await definirRecorrencia(
+        tipo: 'diasDaSemana',
+        intervalo: 1,
+        diasSemana: '1,4',
+      );
+      final planejador = PlanejadorNotificacoes(agendaRepository);
+
+      final resultado = await planejador.planejar(
+        agora: DateTime(2026, 8, 18, 7),
+      );
+
+      expect(resultado, isNotEmpty);
+      expect(resultado.map((item) => item.dataHoraLocal.weekday).toSet(), {
+        DateTime.monday,
+        DateTime.thursday,
+      });
+    });
+  });
+
   test('uso continuo com horarios fixos vira recorrencia diaria', () async {
     await (db.update(db.medicamentos)
           ..where((tabela) => tabela.id.equals('medicamento-1')))
