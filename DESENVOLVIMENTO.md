@@ -99,10 +99,19 @@ notificação e fluxos essenciais de widgets.
   informada entra no ledger (entrada inicial ou ajuste, quando já houve
   movimentações) e o consumo por dose passa a ser exigido enquanto existir
   tratamento ativo.
-- **Medicamentos** cadastra, edita, anexa fotos, altera ou encerra tratamentos e
-  inativa um medicamento. Um medicamento inativado pode ser **reativado**; os
-  tratamentos encerrados continuam encerrados, então inicie um novo tratamento
-  para voltar a gerar doses.
+- **Medicamentos** cadastra, edita, anexa fotos, altera ou encerra tratamentos,
+  inativa e exclui. A lista mostra só os ativos: inativados aparecem na busca
+  por nome ou ao abrir a seção com a contagem. Um medicamento inativado pode
+  ser **reativado**; os tratamentos encerrados continuam encerrados, então
+  inicie um novo tratamento para voltar a gerar doses.
+
+A exclusão é definitiva e existe apenas enquanto não há dose registrada — o
+caso de cadastro errado. Ela apaga em transação, respeitando as chaves
+`RESTRICT`, na ordem adiamentos → movimentações → horários → tratamentos →
+anexos → medicamento; os arquivos das fotos saem depois do commit, tolerando
+falha. Com histórico, `MedicamentoRepository.excluir` lança
+`ExclusaoBloqueadaPorHistorico` e a tela oferece inativar, que preserva os
+registros.
 
 ## Regras de agenda
 

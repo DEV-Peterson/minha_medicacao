@@ -23,6 +23,8 @@ cadastrar fica guardado apenas no seu celular.
 - Repete todos os dias, em dias alternados, em dias da semana escolhidos
   ou uma vez por mês — para remédio semanal, injeção mensal e afins.
 - Guarda foto do medicamento e da receita, se você quiser.
+- Deixa apagar um cadastro feito errado, e esconder da lista o que já
+  terminou — sem perder o histórico.
 
 ## Baixar e instalar
 
