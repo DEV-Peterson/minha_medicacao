@@ -1,10 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission
-        android:name="android.permission.SCHEDULE_EXACT_ALARM"
-        android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Alarme exato concedido pela usuaria em Configuracoes do Android.
+         USE_EXACT_ALARM nao e declarada de proposito: o Google a reserva a
+         apps cuja funcao principal e despertador ou agenda, e um lembrete de
+         medicacao nao se enquadra. Sem a concessao, os lembretes continuam
+         sendo agendados em modo inexato. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:label="Minha Medicação"
