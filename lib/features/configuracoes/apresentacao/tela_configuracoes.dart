@@ -119,6 +119,11 @@ class _TelaConfiguracoesState extends ConsumerState<TelaConfiguracoes> {
               ),
               isThreeLine: true,
             ),
+            const ListTile(
+              leading: Icon(Icons.mail_outline),
+              title: Text('Suporte'),
+              subtitle: SelectableText('petersonmarinho07@hotmail.com'),
+            ),
           ],
         ),
       ),
