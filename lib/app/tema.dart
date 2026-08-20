@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 
-ThemeData criarTema() {
+/// Cor semente do aplicativo, também usada no ícone adaptativo.
+const corSemente = Color(0xFF176B5B);
+
+ThemeData criarTema({Brightness brilho = Brightness.light}) {
+  final escuro = brilho == Brightness.dark;
   final scheme = ColorScheme.fromSeed(
-    seedColor: const Color(0xFF176B5B),
-    brightness: Brightness.light,
+    seedColor: corSemente,
+    brightness: brilho,
   );
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: const Color(0xFFF8FAF9),
+    scaffoldBackgroundColor: escuro
+        ? const Color(0xFF101614)
+        : const Color(0xFFF8FAF9),
     appBarTheme: const AppBarTheme(centerTitle: false),
     cardTheme: const CardThemeData(
       clipBehavior: Clip.antiAlias,

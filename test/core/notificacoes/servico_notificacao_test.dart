@@ -64,6 +64,73 @@ void main() {
     expect(notificacoes.pendentesExternos, isEmpty);
   });
 
+  group('sem permissao de alarme exato', () {
+    test('agenda mesmo assim, em modo inexato', () async {
+      await inserirDoseDasOito();
+      notificacoes.alarmesExatosAtivos = false;
+      final servico = ServicoNotificacao(
+        banco: db,
+        notificacoes: notificacoes,
+        fusoHorario: FusoHorarioNotificacoes(
+          obterIdentificador: () async => 'America/Sao_Paulo',
+        ),
+        agora: () => DateTime(2026, 8, 18, 7),
+      );
+
+      final resultado = await servico.inicializar();
+
+      // O app de lembrete nunca pode ficar mudo: sem alarme exato o aviso
+      // ainda e agendado, apenas com precisao menor.
+      expect(resultado.saude.alarmesExatosHabilitados, isFalse);
+      expect(resultado.reconciliacao?.agendadas, 1);
+      expect(notificacoes.agendamentos, hasLength(1));
+      expect(notificacoes.precisoes.values.single, isFalse);
+    });
+
+    test('conceder a permissao recria os alarmes em modo exato', () async {
+      await inserirDoseDasOito();
+      notificacoes.alarmesExatosAtivos = false;
+      final servico = ServicoNotificacao(
+        banco: db,
+        notificacoes: notificacoes,
+        fusoHorario: FusoHorarioNotificacoes(
+          obterIdentificador: () async => 'America/Sao_Paulo',
+        ),
+        agora: () => DateTime(2026, 8, 18, 7),
+      );
+      await servico.inicializar();
+      expect(notificacoes.precisoes.values.single, isFalse);
+
+      notificacoes.alarmesExatosAtivos = true;
+      notificacoes.cancelouTodas = false;
+      await servico.reconciliar(agora: DateTime(2026, 8, 18, 7));
+
+      // Um alarme pendente guarda a precisao com que nasceu, entao a troca
+      // exige descartar os antigos.
+      expect(notificacoes.cancelouTodas, isTrue);
+      expect(notificacoes.precisoes.values.single, isTrue);
+    });
+
+    test('precisao estavel nao descarta os alarmes pendentes', () async {
+      await inserirDoseDasOito();
+      final servico = ServicoNotificacao(
+        banco: db,
+        notificacoes: notificacoes,
+        fusoHorario: FusoHorarioNotificacoes(
+          obterIdentificador: () async => 'America/Sao_Paulo',
+        ),
+        agora: () => DateTime(2026, 8, 18, 7),
+      );
+      await servico.inicializar();
+      notificacoes.cancelouTodas = false;
+
+      await servico.reconciliar(agora: DateTime(2026, 8, 18, 7));
+
+      expect(notificacoes.cancelouTodas, isFalse);
+      expect(notificacoes.precisoes.values.single, isTrue);
+    });
+  });
+
   test('inicializa fuso, canal, diagnostico e reconciliacao', () async {
     await inserirDoseDasOito();
     final servico = ServicoNotificacao(

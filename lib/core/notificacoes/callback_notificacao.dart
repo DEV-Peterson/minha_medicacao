@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../features/doses/dados/dose_repository.dart';
 import '../banco/app_database.dart';
+import '../util/registro_falhas.dart';
 import 'flutter_notificacoes_locais.dart';
 import 'fuso_horario_notificacoes.dart';
 import 'processador_acoes_notificacao.dart';
@@ -29,12 +29,7 @@ Future<void> _processarRespostaEmBackground(
       notificacoes,
     ).processar(resposta);
   } on Object catch (erro, stackTrace) {
-    developer.log(
-      'Falha ao processar uma acao de notificacao em background.',
-      name: 'minha_medicacao.notificacoes',
-      error: erro,
-      stackTrace: stackTrace,
-    );
+    registrarFalha('ação de notificação em background', erro, stackTrace);
   } finally {
     await banco.close();
   }

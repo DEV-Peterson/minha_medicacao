@@ -88,7 +88,10 @@ final class FlutterNotificacoesLocais implements PortaNotificacoesLocais {
   }
 
   @override
-  Future<void> agendar(AgendamentoNotificacao agendamento) async {
+  Future<void> agendar(
+    AgendamentoNotificacao agendamento, {
+    required bool exato,
+  }) async {
     final local = agendamento.dataHoraLocal.isUtc
         ? agendamento.dataHoraLocal.toLocal()
         : agendamento.dataHoraLocal;
@@ -109,7 +112,9 @@ final class FlutterNotificacoesLocais implements PortaNotificacoesLocais {
       body: agendamento.corpo,
       scheduledDate: dataTz,
       notificationDetails: _detalhes,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: exato
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle,
       payload: agendamento.payloadCodificado,
       matchDateTimeComponents: agendamento.recorrenciaDiaria
           ? DateTimeComponents.time

@@ -53,7 +53,8 @@ class _TelaConfiguracoesState extends ConsumerState<TelaConfiguracoes> {
                 notificationHealth.when(
                   data: (health) => health.alarmesExatosHabilitados
                       ? 'Habilitados'
-                      : 'Não habilitados',
+                      : 'Não habilitados — os lembretes continuam chegando, '
+                            'mas podem atrasar alguns minutos',
                   loading: () => 'Verificando...',
                   error: (_, _) => 'Não foi possível verificar',
                 ),
@@ -107,12 +108,16 @@ class _TelaConfiguracoesState extends ConsumerState<TelaConfiguracoes> {
             ),
             const Divider(),
             const _SectionTitle('Sobre'),
-            const ListTile(
-              leading: Icon(Icons.info_outline),
-              title: Text('Minha Medicação'),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('Minha Medicação'),
               subtitle: Text(
-                'Aplicativo local de organização. Não fornece orientação médica.',
+                'Versão '
+                '${ref.watch(versaoAplicativoProvider).valueOrNull ?? '—'}\n'
+                'Aplicativo local de organização. Não fornece orientação '
+                'médica.',
               ),
+              isThreeLine: true,
             ),
           ],
         ),

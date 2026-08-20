@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../core/banco/app_database.dart';
 import '../core/backup/servico_backup.dart';
@@ -55,6 +56,12 @@ final databaseProvider = Provider<AppDatabase>(
 );
 
 final relogioProvider = Provider<Relogio>((ref) => const RelogioSistema());
+
+/// Versão instalada, exibida em Configurações e útil no suporte.
+final versaoAplicativoProvider = FutureProvider<String>((ref) async {
+  final info = await PackageInfo.fromPlatform();
+  return '${info.version} (${info.buildNumber})';
+});
 
 final medicamentoRepositoryProvider = Provider<MedicamentoRepository>(
   (ref) => MedicamentoRepository(

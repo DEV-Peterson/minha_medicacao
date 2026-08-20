@@ -11,6 +11,9 @@ final class FakeNotificacoesLocais implements PortaNotificacoesLocais {
   bool cancelouTodas = false;
 
   final Map<int, AgendamentoNotificacao> agendamentos = {};
+
+  /// Precisão com que cada alarme foi agendado.
+  final Map<int, bool> precisoes = {};
   final List<int> cancelamentos = [];
   final List<NotificacaoPendente> pendentesExternos = [];
 
@@ -29,8 +32,12 @@ final class FakeNotificacoesLocais implements PortaNotificacoesLocais {
   }
 
   @override
-  Future<void> agendar(AgendamentoNotificacao agendamento) async {
+  Future<void> agendar(
+    AgendamentoNotificacao agendamento, {
+    required bool exato,
+  }) async {
     agendamentos[agendamento.id] = agendamento;
+    precisoes[agendamento.id] = exato;
   }
 
   @override
