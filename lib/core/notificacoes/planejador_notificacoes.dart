@@ -27,34 +27,13 @@ final class ColisaoIdentificadorNotificacao implements Exception {
       '$primeiraDoseKey e $segundaDoseKey.';
 }
 
-/// Mantida para compatibilidade com consumidores antigos. O planejador nao
-/// lanca mais esta excecao: ele conserva as ocorrencias mais proximas e
-/// informa o truncamento em [ResultadoPlanejamentoNotificacoes].
-final class LimiteAgendamentosNotificacaoExcedido implements Exception {
-  const LimiteAgendamentosNotificacaoExcedido(this.limite);
-
-  final int limite;
-
-  @override
-  String toString() =>
-      'A agenda excede o limite seguro de $limite alarmes Android.';
-}
-
 final class PlanejadorNotificacoes {
   PlanejadorNotificacoes(
     this._agendaRepository, {
-    this.diasNoHorizonte = 7,
     this.maximoAgendamentos = limiteSeguroAgendamentosAndroid,
     GerarIdentificadorNotificacao? gerarIdentificador,
   }) : _gerarIdentificador =
            gerarIdentificador ?? IdentificadorNotificacao.paraChave {
-    if (diasNoHorizonte <= 0) {
-      throw ArgumentError.value(
-        diasNoHorizonte,
-        'diasNoHorizonte',
-        'O horizonte deve ter ao menos um dia.',
-      );
-    }
     if (maximoAgendamentos <= 0) {
       throw ArgumentError.value(
         maximoAgendamentos,
@@ -66,9 +45,8 @@ final class PlanejadorNotificacoes {
 
   final AgendaRepository _agendaRepository;
 
-  /// Horizonte historico da API. Ocorrencias individuais agora usam uma
-  /// janela rolante adaptativa que cresce ate ocupar [maximoAgendamentos].
-  final int diasNoHorizonte;
+  /// Ocorrencias individuais usam uma janela rolante adaptativa que cresce ate
+  /// ocupar este limite.
   final int maximoAgendamentos;
   final GerarIdentificadorNotificacao _gerarIdentificador;
 

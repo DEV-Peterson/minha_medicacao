@@ -160,7 +160,7 @@ camadas. Algumas decisões que valem a leitura:
   dados.
 - **Migrações testadas** a cada versão do banco, sem nunca recriar os dados da
   pessoa.
-- **Mais de 160 testes automatizados**, incluindo layouts de 320 px a tablet
+- **Mais de 150 testes automatizados**, incluindo layouts de 320 px a tablet
   com fonte ampliada em 160%.
 
 ```mermaid

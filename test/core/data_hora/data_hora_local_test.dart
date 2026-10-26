@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:minha_medicacao/core/data_hora/data_hora_local.dart';
-import 'package:minha_medicacao/core/data_hora/relogio.dart';
 
 void main() {
   group('DataHoraLocal', () {
@@ -70,20 +69,4 @@ void main() {
       );
     });
   });
-
-  test('Relogio permite injetar um instante previsível', () {
-    final esperado = DateTime(2026, 8, 18, 20, 30);
-    final relogio = _RelogioFalso(esperado);
-
-    expect(relogio.agora(), esperado);
-  });
-}
-
-final class _RelogioFalso implements Relogio {
-  const _RelogioFalso(this.instante);
-
-  final DateTime instante;
-
-  @override
-  DateTime agora() => instante;
 }

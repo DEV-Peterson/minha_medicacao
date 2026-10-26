@@ -22,7 +22,7 @@ void main() {
     await bombearInterface(tester);
   }
 
-  testWidgetsComBanco('inativado sai da lista e volta pela busca', (
+  testWidgetsComBanco('inativado sai da lista e fica na seção de inativados', (
     tester,
     db,
   ) async {

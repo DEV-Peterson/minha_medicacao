@@ -32,7 +32,6 @@ final class ServicoNotificacao {
     PortaNotificacoesLocais? notificacoes,
     FusoHorarioNotificacoes? fusoHorario,
     DateTime Function()? agora,
-    this.diasNoHorizonte = 7,
   }) : _banco = banco,
        _agendaRepository = agendaRepository ?? AgendaRepository(banco),
        _doseRepository = doseRepository ?? DoseRepository(banco),
@@ -48,7 +47,6 @@ final class ServicoNotificacao {
   final PortaNotificacoesLocais _notificacoes;
   final FusoHorarioNotificacoes _fusoHorario;
   final DateTime Function() _agora;
-  final int diasNoHorizonte;
 
   static const String chaveModoAlarme = 'precisaoAlarmeLembretes';
 
@@ -57,7 +55,6 @@ final class ServicoNotificacao {
 
   late final PlanejadorNotificacoes _planejador = PlanejadorNotificacoes(
     _agendaRepository,
-    diasNoHorizonte: diasNoHorizonte,
   );
   late final ReconciliadorNotificacoes _reconciliador =
       ReconciliadorNotificacoes(_notificacoes);
@@ -86,8 +83,8 @@ final class ServicoNotificacao {
 
     final saude = await verificarSaude();
     // A agenda é reconstruída mesmo sem permissão de alarme exato: nesse
-    // caso os lembretes são agendados em modo inexato e podem atrasar
-    // alguns minutos, o que é muito melhor do que não avisar.
+    // caso os lembretes são agendados em modo inexato e podem atrasar até
+    // 1 hora, o que é muito melhor do que não avisar.
     final reconciliacao = await reconciliar();
     return ResultadoInicializacaoNotificacoes(
       saude: saude,
