@@ -21,13 +21,13 @@ instalar o primeiro APK que conterá dados reais.
 - `image_picker` e armazenamento privado para fotos e receitas;
 - `archive`, `crypto`, `file_picker` e `share_plus` para backup local.
 
-O `applicationId` estável é `br.com.minha_medicacao`. Não o altere depois de
-instalar o primeiro APK que conterá dados reais.
-
 ## Preparar o ambiente
 
-1. Instale o Flutter estável seguindo a documentação oficial:
-   <https://docs.flutter.dev/get-started/install/windows/mobile>.
+1. Instale o Flutter **3.44** seguindo a documentação oficial:
+   <https://docs.flutter.dev/get-started/install/windows/mobile>. Versões
+   mais novas do Flutter exigem `intl` acima da versão fixada no
+   `pubspec.yaml` e o `flutter pub get` falha; ao atualizar o Flutter, ajuste
+   essa dependência e rode a validação completa.
 2. Instale Android SDK 36, command-line tools e Java 17.
 3. Aceite as licenças:
 
@@ -158,11 +158,11 @@ As diferenças entre versões do Android ficam concentradas nos lembretes:
   o estado real das notificações;
 - o alarme exato usa apenas `SCHEDULE_EXACT_ALARM`. Abaixo do Android 12 o
   sistema concede sozinho; do Android 14 em diante a usuária precisa conceder,
-  e o aplicativo pede na primeira abertura. `USE_EXACT_ALARM` não é declarada
-  de propósito: o Google a reserva a despertadores e agendas, e o formulário do
-  Console não admite outro enquadramento. Sem a concessão, os lembretes são
-  agendados em modo inexato — chegam com alguns minutos de janela em vez de não
-  chegar;
+  e o aplicativo pede na primeira abertura. `USE_EXACT_ALARM` foi retirada na
+  versão 1.7.0, porque a política do Google Play a reserva a despertadores e
+  agendas. Sem a concessão, os lembretes são agendados em modo inexato — o
+  Android pode entregá-los até 1 hora depois do horário, em vez de não
+  entregar;
 - canais de notificação existem a partir do Android 8; em versões anteriores a
   verificação de canal é considerada satisfeita.
 
@@ -267,7 +267,23 @@ build/app/outputs/flutter-apk/app-release.apk
 Sem `android/key.properties`, o build release falha com uma mensagem explícita.
 O projeto nunca usa silenciosamente a chave de debug para um APK release.
 
-## Instalar no Moto G86
+## Publicar uma versão
+
+O aplicativo é distribuído pelas releases do GitHub. O README aponta para
+`releases/latest` e para o arquivo `Minha-Medicacao.apk`, então mantenha esse
+nome em toda versão.
+
+1. Aumente `version` no `pubspec.yaml` (nome e build, por exemplo `1.8.0+10`).
+2. Rode a validação completa e gere o APK release.
+3. Copie `app-release.apk` para `Minha-Medicacao.apk`.
+4. Crie a tag e a release com as novidades escritas para quem usa:
+
+   ```powershell
+   gh release create v1.8.0 build/app/outputs/flutter-apk/Minha-Medicacao.apk `
+     --title "Minha Medicação 1.8.0" --notes-file NOVIDADES.md
+   ```
+
+## Instalar em um aparelho
 
 1. Transfira `app-release.apk` para o aparelho.
 2. Autorize temporariamente “Instalar apps desconhecidos” para o gerenciador de
@@ -303,7 +319,7 @@ medicação não saiam do aparelho sem uma ação explícita.
 4. Teste **Tomei**, **Adiar** e **Não tomei**; confira histórico e estoque.
 5. Reinicie o aparelho e aguarde a próxima ocorrência.
 6. Repita com economia de bateria habilitada.
-7. Se houver atraso no Moto G86, remova a restrição de bateria para o aplicativo
+7. Se houver atraso, remova a restrição de bateria para o aplicativo
    nas configurações do Android e repita o teste.
 
 O sistema Android não garante alarmes depois de um “Forçar parada” manual até o
@@ -338,7 +354,7 @@ anterior. Após restore, os lembretes são reconstruídos do banco.
 
 ## Teste físico de aceite
 
-No Moto G86 real, valide pelo menos:
+Em um aparelho real, valide pelo menos:
 
 - instalação e atualização do APK sem perda de dados;
 - funcionamento totalmente offline;

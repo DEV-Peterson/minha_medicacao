@@ -1,6 +1,6 @@
 # Política de Privacidade — Minha Medicação
 
-**Última atualização:** 20 de agosto de 2026
+**Última atualização:** 26 de outubro de 2026
 
 O Minha Medicação é um aplicativo Android para organizar medicamentos,
 horários, lembretes, histórico de doses e estoque pessoal. Esta política
@@ -39,7 +39,8 @@ que o aplicativo foi construído para que elas nunca saiam do seu aparelho.
 - Não compartilha informações com terceiros, porque não as coleta.
 - Não acessa contatos, localização, microfone, agenda ou histórico de
   navegação.
-- Não funciona com internet: o aplicativo opera integralmente offline.
+- Não usa internet: o aplicativo nem tem permissão de acesso à rede e opera
+  integralmente offline.
 
 ## Onde as informações ficam
 
@@ -68,9 +69,10 @@ não guarda cópia fora do aparelho.
 | Notificações | Avisar nos horários dos medicamentos |
 | Alarmes e lembretes | Fazer o aviso chegar no horário certo, mesmo com a tela bloqueada |
 | Executar ao iniciar o aparelho | Recolocar os lembretes depois que o celular é reiniciado |
-| Câmera e fotos | Apenas quando você escolhe adicionar a foto de um medicamento ou receita, através do seletor do próprio Android |
-
-O aplicativo não pede permissão ampla de armazenamento.
+O aplicativo não pede permissão de câmera, de fotos nem de armazenamento. Quando
+você adiciona a foto de um medicamento ou de uma receita, ela é escolhida ou
+tirada pelo seletor do próprio Android, e só a imagem escolhida chega ao
+aplicativo.
 
 ## Seus direitos e seu controle
 
