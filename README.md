@@ -19,14 +19,16 @@
 
 ## Por que este aplicativo existe
 
-Quem toma vários remédios — ou cuida de alguém que toma — conhece a dúvida:
-*"será que eu já tomei o da manhã?"*. O Minha Medicação nasceu para resolver
-isso de um jeito simples: ele mostra o que tomar, avisa na hora certa e guarda o
-registro de cada dose.
+Minha mãe precisa tomar várias vitaminas todos os dias. Com tantos frascos,
+horários e quantidades, é fácil perder a conta: *"será que eu já tomei essa
+hoje?"*. O Minha Medicação nasceu para ajudá-la: ele mostra o que tomar, avisa
+na hora certa e guarda o registro de cada dose.
 
-É um projeto pessoal, **gratuito e sem fins lucrativos**, feito para ajudar
-pessoas. Por isso não tem conta, não tem anúncio, não tem cobrança e **não usa
-internet**: tudo o que você cadastra fica só no seu celular.
+Depois decidi deixar o aplicativo disponível para qualquer pessoa com a mesma
+rotina — quem toma vários remédios ou cuida de alguém que toma. É um projeto
+pessoal, **gratuito e sem fins lucrativos**. Por isso não tem conta, não tem
+anúncio, não tem cobrança e **não usa internet**: tudo o que você cadastra fica
+só no seu celular.
 
 ## O que ele faz
 
