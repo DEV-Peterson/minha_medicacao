@@ -54,7 +54,7 @@ class _TelaConfiguracoesState extends ConsumerState<TelaConfiguracoes> {
                   data: (health) => health.alarmesExatosHabilitados
                       ? 'Habilitados'
                       : 'Não habilitados — os lembretes continuam chegando, '
-                            'mas podem atrasar alguns minutos',
+                            'mas podem atrasar até 1 hora',
                   loading: () => 'Verificando...',
                   error: (_, _) => 'Não foi possível verificar',
                 ),
